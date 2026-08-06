@@ -4,6 +4,8 @@ resource "aws_s3_bucket" "frontend_bucket" {
 
 data "aws_iam_policy_document" "frontend_bucket_policy" {
   statement {
+    sid       = "PublicReadGetObject"
+    effect    = "Allow"
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.frontend_bucket.arn}/*"]
     principals {
