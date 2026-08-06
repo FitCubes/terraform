@@ -1,4 +1,9 @@
 module "tf_backend" {
-  source              = "./modules/backend"
+  source              = "./modules/remote_backend"
   backend_bucket_name = var.backend_bucket_name
+}
+
+module "frontend_bucket" {
+  source              = "./modules/frontend_bucket"
+  frontend_bucket_name = var.frontend_bucket_name
 }
