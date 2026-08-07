@@ -15,3 +15,7 @@ output "frontend_bucket_user_access_key_secret" {
 output "compute_instance_public_ip" {
   value = module.compute.eip
 }
+
+output "compute_instance_domain" {
+  value = module.compute.instance_domain
+}
