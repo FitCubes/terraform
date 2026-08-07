@@ -15,7 +15,12 @@ module "users" {
 }
 
 module "compute" {
-  source   = "./modules/compute"
-  vpc_cidr = var.vpc_cidr
-  vpc_name = var.vpc_name
+  source          = "./modules/compute"
+  vpc_cidr        = var.vpc_cidr
+  vpc_name        = var.vpc_name
+  subnet_cidr     = var.subnet_cidr
+  instance_type   = var.instance_type
+  ami             = var.ami
+  public_key_path = var.public_key_path
+  user_data_path  = var.user_data_path
 }
