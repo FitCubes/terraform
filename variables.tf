@@ -1,3 +1,8 @@
+variable "region" {
+  type    = string
+  default = "eu-north-1"
+}
+
 variable "backend_bucket_name" {
   type    = string
   default = "backendbucketfircubes"
@@ -51,17 +56,32 @@ variable "subnets_database_cidrs" {
   type = map(string)
   default = {
     "1" = "10.0.3.0/24"
+    "2" = "10.0.4.0/24"
   }
 }
 
 variable "elasticache_cidrs" {
   type = map(string)
   default = {
-    "2" = "10.0.4.0/24"
+    "2" = "10.0.5.0/24"
   }
 }
 
 variable "instance_type" {
   type    = string
   default = "t3.micro"
+}
+
+
+variable "postgres_password" {
+  type = string
+}
+
+
+variable "postgres_username" {
+  type = string
+}
+
+variable "postgres_db_name" {
+  type = string
 }

@@ -16,6 +16,7 @@ module "users" {
 
 module "compute" {
   source                 = "./modules/compute"
+  region                 = var.region
   vpc_cidr               = var.vpc_cidr
   vpc_name               = var.vpc_name
   subnets_public_cidrs   = var.subnets_public_cidrs
@@ -25,4 +26,7 @@ module "compute" {
   ami                    = var.ami
   public_key_path        = var.public_key_path
   user_data_path         = var.user_data_path
+  postgres_password      = var.postgres_password
+  postgres_username      = var.postgres_username
+  postgres_db_name       = var.postgres_db_name
 }
