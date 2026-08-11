@@ -1,13 +1,21 @@
 variable "vpc_cidr" {
-  type    = string
+  type = string
 }
 
 variable "vpc_name" {
-  type    = string
+  type = string
 }
 
-variable "subnet_cidr" {
-  type    = string
+variable "subnets_public_cidrs" {
+  type = map(string)
+}
+
+variable "subnets_database_cidrs" {
+  type = map(string)
+}
+
+variable "elasticache_cidrs" {
+  type = map(string)
 }
 
 variable "ingress_rules" {
@@ -38,7 +46,7 @@ variable "ami" {
 }
 
 variable "instance_type" {
-  type    = string
+  type = string
 }
 
 variable "public_key_path" {

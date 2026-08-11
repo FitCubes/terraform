@@ -39,9 +39,26 @@ variable "user_data_path" {
   default = "./user-data.sh"
 }
 
-variable "subnet_cidr" {
-  type    = string
-  default = "10.0.0.0/24"
+variable "subnets_public_cidrs" {
+  type = map(string)
+  default = {
+    "1" = "10.0.1.0/24"
+    "2" = "10.0.2.0/24"
+  }
+}
+
+variable "subnets_database_cidrs" {
+  type = map(string)
+  default = {
+    "1" = "10.0.3.0/24"
+  }
+}
+
+variable "elasticache_cidrs" {
+  type = map(string)
+  default = {
+    "2" = "10.0.4.0/24"
+  }
 }
 
 variable "instance_type" {
