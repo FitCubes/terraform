@@ -29,4 +29,5 @@ module "compute" {
   postgres_password      = var.postgres_password
   postgres_username      = var.postgres_username
   postgres_db_name       = var.postgres_db_name
+  jwt_secret             = var.jwt_secret
 }

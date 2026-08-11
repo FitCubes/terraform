@@ -3,16 +3,8 @@ resource "aws_key_pair" "ec2" {
   public_key = file(var.public_key_path)
 }
 
-resource "aws_launch_template" "example" {
+resource "aws_launch_template" "backend" {
   name = "${var.vpc_name}-launch-template"
-
-  block_device_mappings {
-    device_name = "/dev/sdf"
-
-    ebs {
-      volume_size = 10
-    }
-  }
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_profile.name
@@ -34,10 +26,8 @@ resource "aws_launch_template" "example" {
 
   network_interfaces {
     associate_public_ip_address = true
+    security_groups = [aws_security_group.backend.id]
   }
-
-  vpc_security_group_ids = [aws_security_group.backend.id]
-
 
   tag_specifications {
     resource_type = "instance"
@@ -49,7 +39,13 @@ resource "aws_launch_template" "example" {
 
   user_data = base64encode(<<-EOD
         #!/bin/bash
-        sudo apt update -y
+        sudo apt update
+        sudo apt install -y unzip curl
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+        rm -rf awscliv2.zip aws
+
         sudo apt install -y ca-certificates curl
         sudo install -m 0755 -d /etc/apt/keyrings
         sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -73,6 +69,7 @@ resource "aws_launch_template" "example" {
         DB_PASSWORD=$(aws ssm get-parameter --name "${aws_ssm_parameter.db_password.name}" --region $REGION --query Parameter.Value --output text --with-decryption)
         REDIS_ADDRESS=$(aws ssm get-parameter --name "${aws_ssm_parameter.redis_address.name}" --region $REGION --query Parameter.Value --output text --with-decryption)
         DB_NAME=$(aws ssm get-parameter --name "${aws_ssm_parameter.db_name.name}" --region $REGION --query Parameter.Value --output text --with-decryption)
+        JWT_SECRET=$(aws ssm get-parameter --name "${aws_ssm_parameter.jwt_secret.name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 
         sudo docker run -d -p 8080:8080 --restart always \
         -e SPRING_DATASOURCE_URL=jdbc:postgresql://$DB_ADDRESS:${aws_db_instance.main.port}/$DB_NAME \
@@ -80,7 +77,31 @@ resource "aws_launch_template" "example" {
         -e SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD \
         -e SPRING_DATA_REDIS_HOST=$REDIS_ADDRESS \
         -e SPRING_DATA_REDIS_PORT=${aws_elasticache_cluster.redis.port} \
+        -e JWT_SECRET=$JWT_SECRET \
         fitcubes/backend:latest
     EOD
   )
+}
+
+resource "aws_lb_target_group" "backend" {
+  name     = "${var.vpc_name}-backend-tg"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+}
+
+resource "aws_autoscaling_group" "ec2_asg" {
+
+  desired_capacity   = 1
+  max_size           = 2
+  min_size           = 1
+
+  vpc_zone_identifier = [for subnet in aws_subnet.public : subnet.id]
+
+  launch_template {
+    id      = aws_launch_template.backend.id
+    version = "$Latest"
+  }
+
+  target_group_arns = [aws_lb_target_group.backend.arn]
 }

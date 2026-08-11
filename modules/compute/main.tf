@@ -1,8 +1,3 @@
-resource "aws_db_subnet_group" "postgres" {
-  name       = "${var.vpc_name}-subnet-group"
-  subnet_ids = [for subnet in aws_subnet.database : subnet.id]
-}
-
 resource "aws_db_instance" "main" {
   allocated_storage      = 20
   engine                 = "postgres"
@@ -16,10 +11,6 @@ resource "aws_db_instance" "main" {
   db_name                = var.postgres_db_name
 }
 
-resource "aws_elasticache_subnet_group" "redis" {
-  name       = "${var.vpc_name}-redis-cluster"
-  subnet_ids = [for subnet in aws_subnet.elasticache : subnet.id]
-}
 
 resource "aws_elasticache_cluster" "redis" {
   cluster_id         = "${var.vpc_name}-redis-cluster"
@@ -66,4 +57,11 @@ resource "aws_ssm_parameter" "redis_address" {
   description = "Redis Address"
   type        = "SecureString"
   value       = aws_elasticache_cluster.redis.cache_nodes[0].address
+}
+
+resource "aws_ssm_parameter" "jwt_secret" {
+  name        = "/${var.vpc_name}/backend/jwt_secret"
+  description = "Redis Address"
+  type        = "SecureString"
+  value       = var.jwt_secret
 }

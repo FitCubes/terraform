@@ -49,6 +49,7 @@ variable "subnets_public_cidrs" {
   default = {
     "1" = "10.0.1.0/24"
     "2" = "10.0.2.0/24"
+    "3" = "10.0.6.0/24"
   }
 }
 
@@ -83,5 +84,9 @@ variable "postgres_username" {
 }
 
 variable "postgres_db_name" {
+  type = string
+}
+
+variable "jwt_secret" {
   type = string
 }

@@ -37,8 +37,8 @@ variable "ingress_rules_backend" {
       cidr_blocks = ["0.0.0.0/0"]
     },
     {
-      from_port   = 80
-      to_port     = 80
+      from_port   = 8080
+      to_port     = 8080
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
     }
@@ -95,3 +95,6 @@ variable "engine_version_redis" {
   default = "7.1"
 }
 
+variable "jwt_secret" {
+  type = string
+}
