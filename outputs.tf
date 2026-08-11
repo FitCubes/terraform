@@ -16,6 +16,14 @@ output "db_adress" {
   value = module.compute.db_domain
 }
 
-output "redis_adress" {
-  value = module.compute.redis_domain
+output "redis_node_adress" {
+  value = module.compute.redis_node_domain
+}
+
+# output "redis_address" {
+#   value = module.compute.redis_address_endpoint
+# }
+
+output "alb_domain" {
+  value = module.compute.alb_domain
 }

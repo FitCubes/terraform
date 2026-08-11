@@ -26,7 +26,7 @@ resource "aws_launch_template" "backend" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups = [aws_security_group.backend.id]
+    security_groups             = [aws_security_group.backend.id]
   }
 
   tag_specifications {
@@ -83,18 +83,12 @@ resource "aws_launch_template" "backend" {
   )
 }
 
-resource "aws_lb_target_group" "backend" {
-  name     = "${var.vpc_name}-backend-tg"
-  port     = 8080
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
-}
-
 resource "aws_autoscaling_group" "ec2_asg" {
+  name = "${var.vpc_name}-asg"
 
-  desired_capacity   = 1
-  max_size           = 2
-  min_size           = 1
+  desired_capacity = 1
+  max_size         = 2
+  min_size         = 1
 
   vpc_zone_identifier = [for subnet in aws_subnet.public : subnet.id]
 
@@ -104,4 +98,15 @@ resource "aws_autoscaling_group" "ec2_asg" {
   }
 
   target_group_arns = [aws_lb_target_group.backend.arn]
+
+  health_check_type         = "ELB"
+  health_check_grace_period = 300
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 100
+    }
+  }
 }
+
