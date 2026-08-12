@@ -45,26 +45,35 @@ variable "user_data_path" {
 }
 
 variable "subnets_public_cidrs" {
-  type = map(string)
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
   default = {
-    "1" = "10.0.1.0/24"
-    "2" = "10.0.2.0/24"
-    "3" = "10.0.6.0/24"
+    "0" = { cidr = "10.0.1.0/24", az = "eu-north-1a" }
+    "1" = { cidr = "10.0.2.0/24", az = "eu-north-1b" }
+    "3" = { cidr = "10.0.6.0/24", az = "eu-north-1c" }
   }
 }
 
 variable "subnets_database_cidrs" {
-  type = map(string)
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
   default = {
-    "1" = "10.0.3.0/24"
-    "2" = "10.0.4.0/24"
+    "0" = { cidr = "10.0.3.0/24", az = "eu-north-1a" }
+    "2" = { cidr = "10.0.4.0/24", az = "eu-north-1c" }
   }
 }
 
 variable "elasticache_cidrs" {
-  type = map(string)
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
   default = {
-    "2" = "10.0.5.0/24"
+    "2" = { cidr = "10.0.5.0/24", az = "eu-north-1c" }
   }
 }
 

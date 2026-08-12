@@ -12,37 +12,37 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
+
 resource "aws_subnet" "public" {
   for_each                = var.subnets_public_cidrs
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = each.value
+  cidr_block              = each.value.cidr
   map_public_ip_on_launch = true
-  availability_zone       = element(data.aws_availability_zones.available.names, tonumber(each.key) - 1)
+  availability_zone       = each.value.az
   tags = {
-    Name = "${var.vpc_name}-public-az${each.key}"
+    Name = "${var.vpc_name}-public-${each.key}"
   }
 }
-
 
 resource "aws_subnet" "database" {
   for_each                = var.subnets_database_cidrs
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = each.value
+  cidr_block              = each.value.cidr
   map_public_ip_on_launch = false
-  availability_zone       = data.aws_availability_zones.available.names[each.key]
+  availability_zone       = each.value.az
   tags = {
-    Name = "${var.vpc_name}-database-az${each.key}"
+    Name = "${var.vpc_name}-database-${each.key}"
   }
 }
 
 resource "aws_subnet" "elasticache" {
-  for_each                = var.elasticache_cidrs
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = each.value
+  for_each = var.elasticache_cidrs
+  vpc_id = aws_vpc.main.id
+  cidr_block = each.value.cidr
   map_public_ip_on_launch = false
-  availability_zone       = data.aws_availability_zones.available.names[each.key]
+  availability_zone = each.value.az
   tags = {
-    Name = "${var.vpc_name}-elasticache-az${each.key}"
+    Name = "${var.vpc_name}-elasticache-${each.key}"
   }
 }
 

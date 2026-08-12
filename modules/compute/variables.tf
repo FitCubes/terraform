@@ -11,15 +11,24 @@ variable "vpc_name" {
 }
 
 variable "subnets_public_cidrs" {
-  type = map(string)
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
 }
 
 variable "subnets_database_cidrs" {
-  type = map(string)
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
 }
 
 variable "elasticache_cidrs" {
-  type = map(string)
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
 }
 
 variable "ami" {

@@ -41,6 +41,12 @@ resource "github_actions_secret" "backend_asg_refresh_access_key_secret" {
   value       = var.asg_refresh_access_key_secret
 }
 
+resource "github_actions_secret" "backend_region" {
+  repository  = data.github_repository.backend.name
+  secret_name = "AWS_REGION"
+  value       = var.aws_region
+}
+
 resource "github_actions_secret" "dockerhub_username" {
   repository  = data.github_repository.backend.name
   secret_name = "DOCKERHUB_USERNAME"
