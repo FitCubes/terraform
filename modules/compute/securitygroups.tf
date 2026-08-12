@@ -1,3 +1,7 @@
+data "cloudflare_ip_ranges" "ip" {
+
+}
+
 resource "aws_security_group" "alb" {
   name   = "${var.vpc_name}-alb-sg"
   vpc_id = aws_vpc.main.id
@@ -5,7 +9,7 @@ resource "aws_security_group" "alb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = data.cloudflare_ip_ranges.ip.ipv4_cidrs
   }
 
   egress {
