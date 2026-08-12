@@ -75,18 +75,47 @@ variable "instance_type" {
 
 
 variable "postgres_password" {
-  type = string
+  type      = string
+  sensitive = true
 }
 
 
 variable "postgres_username" {
   type = string
+  sensitive = true
 }
 
 variable "postgres_db_name" {
   type = string
+  sensitive = true
 }
 
 variable "jwt_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "github_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "github_owner" {
   type = string
+}
+
+variable "dockerhub_username" {
+  type      = string
+  sensitive = true
+}
+
+
+variable "dockerhub_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "repository_name" {
+  type = string
+  sensitive = true
 }

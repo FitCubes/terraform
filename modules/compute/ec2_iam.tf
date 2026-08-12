@@ -68,13 +68,6 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_iam_role_policy_attachment" "name" {
-  role       = aws_iam_role.ec2_ssm_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-}
-
-
-
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "${var.vpc_name}-ec2-profile"
   role = aws_iam_role.ec2_ssm_role.name

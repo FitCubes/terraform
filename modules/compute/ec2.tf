@@ -106,6 +106,8 @@ resource "aws_autoscaling_group" "ec2_asg" {
     strategy = "Rolling"
     preferences {
       min_healthy_percentage = 100
+      max_healthy_percentage = 200
+      auto_rollback          = true
     }
   }
 }

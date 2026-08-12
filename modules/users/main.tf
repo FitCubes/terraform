@@ -40,3 +40,37 @@ resource "aws_iam_user_policy_attachment" "frontend_bucket_user_policy_attachmen
 resource "aws_iam_access_key" "frontend_bucket_user_access_key" {
   user = aws_iam_user.frontend_bucket_user.name
 }
+
+
+data "aws_iam_policy_document" "backend_asg_refresh" {
+  statement {
+    sid    = "AllowRefreshInstances"
+    effect = "Allow"
+    actions = [
+      "autoscaling:StartInstanceRefresh",
+      "autoscaling:CancelInstanceRefresh",
+      "autoscaling:DescribeInstanceRefreshes",
+      "autoscaling:DescribeAutoScalingGroups"
+    ]
+    resources = [
+      var.asg_arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "asg_refresh" {
+  name   = "asg_refresh_policy"
+  policy = data.aws_iam_policy_document.backend_asg_refresh.json
+}
+resource "aws_iam_user" "backend_asg_refresh_user" {
+  name = "backend_refresh_asg_user"
+}
+
+resource "aws_iam_user_policy_attachment" "asg_refresh" {
+  user       = aws_iam_user.backend_asg_refresh_user.name
+  policy_arn = aws_iam_policy.asg_refresh.arn
+}
+
+resource "aws_iam_access_key" "asg-refresh" {
+  user = aws_iam_user.backend_asg_refresh_user.name
+}

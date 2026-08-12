@@ -3,6 +3,7 @@ terraform {
     bucket       = "backendbucketfircubes18234"
     key          = "terraform.tfstate"
     region       = "eu-north-1"
+    encrypt      = true
     use_lockfile = true
   }
   required_providers {
@@ -10,15 +11,25 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.0"
+    }
   }
 }
 
 provider "aws" {
-  region = "eu-north-1"
+  region = var.region
   default_tags {
     tags = {
       Environment = "dev"
       App         = "FitCubes"
     }
   }
+}
+
+
+provider "github" {
+  token = var.github_token
+  owner = var.github_owner
 }

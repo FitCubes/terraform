@@ -6,3 +6,6 @@ variable "frontend_bucket_name" {
   type = string
 }
 
+variable "asg_arn" {
+  type = string
+}

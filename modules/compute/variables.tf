@@ -75,3 +75,4 @@ variable "engine_version_redis" {
 variable "jwt_secret" {
   type = string
 }
+

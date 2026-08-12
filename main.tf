@@ -12,6 +12,7 @@ module "users" {
   source               = "./modules/users"
   frontend_bucket_name = var.frontend_bucket_name
   frontend_bucket_arn  = module.frontend_bucket.frontend_bucket_arn
+  asg_arn              = module.compute.asg_arn
 }
 
 module "compute" {
@@ -30,4 +31,18 @@ module "compute" {
   postgres_username      = var.postgres_username
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
+}
+
+
+module "github" {
+  source                        = "./modules/github"
+  aws_access_key                = module.users.frontend_bucket_user_access_key
+  aws_access_key_secret         = module.users.frontend_bucket_user_access_key_secret
+  aws_region                    = var.region
+  frontend_s3_bucket            = var.frontend_bucket_name
+  asg_resresh_access_key        = module.users.asg_refresh_access_key
+  asg_refresh_access_key_secret = module.users.asg_refresh_access_key_secret
+  dockerhub_token               = var.dockerhub_token
+  dockerhub_username            = var.dockerhub_username
+  repository_name               = var.repository_name
 }
