@@ -70,3 +70,15 @@ resource "github_actions_secret" "backend_domain" {
   secret_name = "BACKEND_DOMAIN"
   value       = var.backend_domain
 }
+
+resource "github_actions_secret" "cloudflare_api_token" {
+  repository  = data.github_repository.frontend.name
+  secret_name = "CLOUDFLARE_API_TOKEN"
+  value       = var.cloudflare_purge_token
+}
+
+resource "github_actions_secret" "cloudflare_zone_id" {
+  repository  = data.github_repository.frontend.name
+  secret_name = "CLOUDFLARE_ZONE_ID"
+  value       = var.cloudflare_zone_id
+}

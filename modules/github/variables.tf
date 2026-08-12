@@ -54,3 +54,13 @@ variable "backend_domain" {
   type      = string
   sensitive = true
 }
+
+variable "cloudflare_purge_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "cloudflare_zone_id" {
+  type      = string
+  sensitive = true
+}

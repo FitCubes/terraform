@@ -46,6 +46,8 @@ module "github" {
   dockerhub_username            = var.dockerhub_username
   repository_name               = var.repository_name
   backend_domain                = var.backend_domain
+  cloudflare_purge_token        = module.clodflare.cache_purge_token
+  cloudflare_zone_id            = var.cloudflare_zone_id
 }
 
 module "clodflare" {
