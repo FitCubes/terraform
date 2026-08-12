@@ -90,12 +90,12 @@ variable "postgres_password" {
 
 
 variable "postgres_username" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "postgres_db_name" {
-  type = string
+  type      = string
   sensitive = true
 }
 
@@ -125,6 +125,23 @@ variable "dockerhub_token" {
 }
 
 variable "repository_name" {
+  type      = string
+  sensitive = true
+}
+variable "frontend_domain" {
   type = string
+}
+
+variable "cloudflare_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "backend_domain" {
+  type = string
+}
+
+variable "cloudflare_zone_id" {
+  type      = string
   sensitive = true
 }

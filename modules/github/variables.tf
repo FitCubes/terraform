@@ -14,7 +14,7 @@ variable "aws_access_key" {
 }
 
 variable "aws_access_key_secret" {
-  type = string
+  type      = string
   sensitive = true
 }
 
@@ -46,6 +46,11 @@ variable "dockerhub_token" {
 }
 
 variable "repository_name" {
-  type = string
+  type      = string
+  sensitive = true
+}
+
+variable "backend_domain" {
+  type      = string
   sensitive = true
 }

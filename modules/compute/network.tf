@@ -36,11 +36,11 @@ resource "aws_subnet" "database" {
 }
 
 resource "aws_subnet" "elasticache" {
-  for_each = var.elasticache_cidrs
-  vpc_id = aws_vpc.main.id
-  cidr_block = each.value.cidr
+  for_each                = var.elasticache_cidrs
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = each.value.cidr
   map_public_ip_on_launch = false
-  availability_zone = each.value.az
+  availability_zone       = each.value.az
   tags = {
     Name = "${var.vpc_name}-elasticache-${each.key}"
   }

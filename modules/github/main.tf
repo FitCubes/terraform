@@ -64,3 +64,9 @@ resource "github_actions_secret" "repository_name" {
   secret_name = "REPOSITORY_NAME"
   value       = var.repository_name
 }
+
+resource "github_actions_secret" "backend_domain" {
+  repository  = data.github_repository.frontend.name
+  secret_name = "BACKEND_DOMAIN"
+  value       = var.backend_domain
+}

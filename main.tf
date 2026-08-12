@@ -45,4 +45,12 @@ module "github" {
   dockerhub_token               = var.dockerhub_token
   dockerhub_username            = var.dockerhub_username
   repository_name               = var.repository_name
+  backend_domain                = var.backend_domain
+}
+
+module "clodflare" {
+  source                 = "./modules/cloudflare"
+  frontent_bucket_domain = module.frontend_bucket.frontend_link
+  cloudflare_zone_id     = var.cloudflare_zone_id
+  alb_domain             = module.compute.alb_domain
 }

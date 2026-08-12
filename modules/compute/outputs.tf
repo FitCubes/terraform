@@ -18,6 +18,6 @@ output "asg_arn" {
 #   value = aws_elasticache_cluster.redis.configuration_endpoint
 # }
 
-# output "alb_domain" {
-#   value = aws_lb.backend.dns_name
-# }
+output "alb_domain" {
+  value = aws_lb.backend.dns_name
+}

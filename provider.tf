@@ -15,6 +15,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
+    }
   }
 }
 
@@ -32,4 +36,8 @@ provider "aws" {
 provider "github" {
   token = var.github_token
   owner = var.github_owner
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_token
 }

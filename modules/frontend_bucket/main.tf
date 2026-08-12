@@ -1,5 +1,7 @@
 resource "aws_s3_bucket" "frontend_bucket" {
-  bucket = var.frontend_bucket_name
+  bucket        = var.frontend_bucket_name
+  force_destroy = true
+
 }
 
 data "aws_iam_policy_document" "frontend_bucket_policy" {

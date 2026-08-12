@@ -34,6 +34,6 @@ output "redis_node_adress" {
 #   value = module.compute.redis_address_endpoint
 # }
 
-# output "alb_domain" {
-#   value = module.compute.alb_domain
-# }
+output "alb_domain" {
+  value = module.compute.alb_domain
+}
