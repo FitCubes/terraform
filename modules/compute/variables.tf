@@ -85,3 +85,17 @@ variable "jwt_secret" {
   type = string
 }
 
+variable "backup_instance_type" {
+  type    = string
+  default = "t3.small"
+}
+
+variable "log_group_name" {
+  type    = string
+  default = "fitcubes/backend/ec2"
+}
+
+variable "metrics_namespace" {
+  type = string
+  default = "FitCubes/EC2"
+}

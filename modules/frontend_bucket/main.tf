@@ -1,5 +1,5 @@
 data "cloudflare_ip_ranges" "ip" {
-  
+
 }
 
 resource "aws_s3_bucket" "frontend_bucket" {
@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "frontend_bucket_policy" {
       identifiers = ["*"]
     }
     condition {
-      test = "IpAddress"
+      test     = "IpAddress"
       variable = "aws:SourceIp"
       values   = concat(data.cloudflare_ip_ranges.ip.ipv6_cidrs, data.cloudflare_ip_ranges.ip.ipv4_cidrs)
     }
