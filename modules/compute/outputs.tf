@@ -14,9 +14,6 @@ output "asg_arn" {
   value = aws_autoscaling_group.ec2_asg.arn
 }
 
-# output "redis_address_endpoint" {
-#   value = aws_elasticache_cluster.redis.configuration_endpoint
-# }
 
 output "alb_domain" {
   value = aws_lb.backend.dns_name

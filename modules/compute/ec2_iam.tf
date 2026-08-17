@@ -25,7 +25,8 @@ data "aws_iam_policy_document" "ec2_allow_ssm" {
       aws_ssm_parameter.db_name.arn,
       aws_ssm_parameter.db_password.arn,
       aws_ssm_parameter.db_username.arn,
-      aws_ssm_parameter.redis_address.arn
+      aws_ssm_parameter.redis_address.arn,
+      aws_ssm_parameter.jwt_secret.arn
     ]
   }
   statement {
