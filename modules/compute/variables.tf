@@ -41,8 +41,16 @@ variable "instance_type" {
   default = "t3.micro"
 }
 
-variable "public_key_path" {
-  type = string
+variable "asg_min_size" {
+  type = number
+}
+
+variable "asg_max_size" {
+  type = number
+}
+
+variable "asg_desired" {
+  type = number
 }
 
 variable "user_data_path" {
@@ -85,17 +93,10 @@ variable "jwt_secret" {
   type = string
 }
 
-variable "backup_instance_type" {
-  type    = string
-  default = "t3.small"
-}
-
 variable "log_group_name" {
-  type    = string
-  default = "fitcubes/backend/ec2"
+  type = string
 }
 
 variable "metrics_namespace" {
   type = string
-  default = "FitCubes/EC2"
 }

@@ -34,11 +34,6 @@ variable "ami" {
   default = "ami-0e91d8cb1f8959277"
 }
 
-variable "public_key_path" {
-  type    = string
-  default = "~/.ssh/ec2.pub"
-}
-
 variable "user_data_path" {
   type    = string
   default = "./user-data.sh"
@@ -79,9 +74,23 @@ variable "elasticache_cidrs" {
 
 variable "instance_type" {
   type    = string
-  default = "t3.micro"
+  default = "t3.small"
 }
 
+variable "asg_min_size" {
+  type    = number
+  default = 1
+}
+
+variable "asg_max_size" {
+  type    = number
+  default = 2
+}
+
+variable "asg_desired" {
+  type    = number
+  default = 1
+}
 
 variable "postgres_password" {
   type      = string
@@ -144,4 +153,15 @@ variable "backend_domain" {
 variable "cloudflare_zone_id" {
   type      = string
   sensitive = true
+}
+
+
+variable "log_group_name" {
+  type    = string
+  default = "fitcubes/backend/ec2"
+}
+
+variable "metrics_namespace" {
+  type    = string
+  default = "FitCubes/EC2"
 }

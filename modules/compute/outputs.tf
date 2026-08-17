@@ -21,3 +21,7 @@ output "asg_arn" {
 output "alb_domain" {
   value = aws_lb.backend.dns_name
 }
+
+output "asg_name" {
+  value = aws_autoscaling_group.ec2_asg.name
+}

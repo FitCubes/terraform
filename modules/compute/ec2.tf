@@ -1,8 +1,3 @@
-resource "aws_key_pair" "ec2" {
-  key_name   = "${var.vpc_name}-ec2-key"
-  public_key = file(var.public_key_path)
-}
-
 resource "aws_launch_template" "backend" {
   name = "${var.vpc_name}-launch-template"
 
@@ -15,8 +10,6 @@ resource "aws_launch_template" "backend" {
   instance_initiated_shutdown_behavior = "terminate"
 
   instance_type = var.instance_type
-
-  key_name = aws_key_pair.ec2.key_name
 
   monitoring {
     enabled = true
@@ -145,37 +138,23 @@ resource "aws_autoscaling_group" "ec2_asg" {
 
   vpc_zone_identifier = [for subnet in aws_subnet.public : subnet.id]
 
-  # launch_template {
-  #   id      = aws_launch_template.backend.id
-  #   version = "$Latest"
-  # }
+  launch_template {
+    id      = aws_launch_template.backend.id
+    version = "$Latest"
+  }
 
   target_group_arns = [aws_lb_target_group.backend.arn]
 
   health_check_type         = "ELB"
   health_check_grace_period = 300
 
-  mixed_instances_policy {
-    launch_template {
-      launch_template_specification {
-        launch_template_id = aws_launch_template.backend.id
-        version            = "$Latest"
-      }
-      override {
-        instance_type = var.instance_type
-      }
-      override {
-        instance_type = var.backup_instance_type
-      }
-    }
-  }
   enabled_metrics = ["GroupInServiceInstances"]
   instance_refresh {
     strategy = "Rolling"
     preferences {
       min_healthy_percentage = 100
       max_healthy_percentage = 200
-      # auto_rollback          = true
+      auto_rollback          = true
     }
   }
 }
