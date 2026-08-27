@@ -141,10 +141,6 @@ variable "frontend_domain" {
   type = string
 }
 
-variable "cloudflare_token" {
-  type      = string
-  sensitive = true
-}
 
 variable "backend_domain" {
   type = string
@@ -164,4 +160,14 @@ variable "log_group_name" {
 variable "metrics_namespace" {
   type    = string
   default = "FitCubes/EC2"
+}
+
+variable "cloudflare_api_key" {
+  type = string
+  sensitive = true
+}
+
+variable "cloudflare_email" {
+  type = string
+  sensitive = true
 }

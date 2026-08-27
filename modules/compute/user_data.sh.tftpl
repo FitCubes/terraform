@@ -44,8 +44,6 @@ cat <<-'CFG' | sudo tee /opt/aws/amazon-cloudwatch-agent/etc/config.json
     "metrics": {
     "namespace": "${metrics_namespace}",
     "append_dimensions": {
-        "InstanceId": "$${aws:InstanceId}",
-        "InstanceType": "$${aws:InstanceType}",
         "AutoScalingGroupName": "$${aws:AutoScalingGroupName}"
     },
     "metrics_collected": {
@@ -58,7 +56,6 @@ cat <<-'CFG' | sudo tee /opt/aws/amazon-cloudwatch-agent/etc/config.json
         "measurement": ["used_percent"],
         "resources": ["/"]
         },
-        "diskio": { "measurement": ["io_time"], "resources": ["*"] },
         "swap": { "measurement": ["swap_used_percent"] },
         "netstat": { "measurement": ["tcp_established", "tcp_time_wait"] }
     }

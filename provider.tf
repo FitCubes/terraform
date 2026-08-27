@@ -39,5 +39,6 @@ provider "github" {
 }
 
 provider "cloudflare" {
-  api_token = var.cloudflare_token
+  api_key = var.cloudflare_api_key
+  email = var.cloudflare_email
 }
