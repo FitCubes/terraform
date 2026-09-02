@@ -58,6 +58,7 @@ variable "subnets_database_cidrs" {
   }))
   default = {
     "0" = { cidr = "10.0.3.0/24", az = "eu-north-1a" }
+    "1" = { cidr = "10.0.8.0/24", az = "eu-north-1b" }
     "2" = { cidr = "10.0.4.0/24", az = "eu-north-1c" }
   }
 }
@@ -163,11 +164,11 @@ variable "metrics_namespace" {
 }
 
 variable "cloudflare_api_key" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "cloudflare_email" {
-  type = string
+  type      = string
   sensitive = true
 }

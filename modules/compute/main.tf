@@ -1,17 +1,3 @@
-resource "aws_db_instance" "main" {
-  allocated_storage      = 20
-  engine                 = "postgres"
-  engine_version         = var.postgres_version
-  instance_class         = var.postgres_instance
-  username               = var.postgres_username
-  password               = var.postgres_password
-  skip_final_snapshot    = true
-  vpc_security_group_ids = [aws_security_group.db.id]
-  db_subnet_group_name   = aws_db_subnet_group.postgres.name
-  db_name                = var.postgres_db_name
-}
-
-
 resource "aws_elasticache_cluster" "redis" {
   cluster_id         = "${var.vpc_name}-redis-cluster"
   node_type          = var.node_type_redis
