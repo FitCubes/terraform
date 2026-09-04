@@ -30,6 +30,7 @@ DB_PASSWORD=$(aws ssm get-parameter --name "${db_password_ssm_name}" --region $R
 REDIS_ADDRESS=$(aws ssm get-parameter --name "${redis_address_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 DB_NAME=$(aws ssm get-parameter --name "${db_name_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 JWT_SECRET=$(aws ssm get-parameter --name "${jwt_secret_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
+FRONTEND_URL=$(aws ssm get-parameter --name "${frontend_url_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 
 sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 sudo apt install ./amazon-cloudwatch-agent.deb -y
@@ -87,5 +88,6 @@ sudo docker run -d --name backend-java -p 8080:8080 --restart always \
     -e SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD \
     -e SPRING_DATA_REDIS_HOST=$REDIS_ADDRESS \
     -e SPRING_DATA_REDIS_PORT=${elasticache_cluster_port} \
+    -e FRONTEND_URL=$FRONTEND_URL \
     -e JWT_SECRET=$JWT_SECRET \
     fitcubes/backend:latest

@@ -36,6 +36,7 @@ resource "aws_launch_template" "backend" {
     db_password_ssm_name     = aws_ssm_parameter.db_password.name,
     redis_address_ssm_name   = aws_ssm_parameter.redis_address.name,
     db_name_ssm_name         = aws_ssm_parameter.db_name.name,
+    frontend_url_ssm_name    = aws_ssm_parameter.frontend_url.name,
     jwt_secret_ssm_name      = aws_ssm_parameter.jwt_secret.name,
     elasticache_cluster_port = aws_elasticache_cluster.redis.port
     db_port                  = aws_db_instance.main.port

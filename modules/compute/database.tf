@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "backup_role" {
   statement {
     effect = "Allow"
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["backup.amazonaws.com"]
     }
     actions = ["sts:AssumeRole"]
@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "backup_role" {
 
 
 resource "aws_iam_role" "backup_role" {
-  name = "backup-role"
+  name               = "backup-role"
   assume_role_policy = data.aws_iam_policy_document.backup_role.json
 }
 
@@ -44,9 +44,9 @@ resource "aws_backup_vault" "main" {
 resource "aws_backup_plan" "main" {
   name = "${var.vpc_name}-backup"
   rule {
-    rule_name = "default"
+    rule_name         = "default"
     target_vault_name = aws_backup_vault.main.name
-    schedule = "cron(0 2 * * ? *)"
+    schedule          = "cron(0 2 * * ? *)"
     lifecycle {
       delete_after = 7
     }
@@ -54,13 +54,13 @@ resource "aws_backup_plan" "main" {
 }
 
 resource "aws_backup_selection" "name" {
- iam_role_arn = aws_iam_role.backup_role.arn
- name = "${var.vpc_name}"
- plan_id = aws_backup_plan.main.id
+  iam_role_arn = aws_iam_role.backup_role.arn
+  name         = var.vpc_name
+  plan_id      = aws_backup_plan.main.id
 
- selection_tag {
-  type = "STRINGEQUALS"
-  key = "Backup"
-  value = "True"
- }
+  selection_tag {
+    type  = "STRINGEQUALS"
+    key   = "Backup"
+    value = "True"
+  }
 }

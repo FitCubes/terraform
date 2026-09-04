@@ -35,6 +35,7 @@ module "compute" {
   asg_desired            = var.asg_desired
   asg_max_size           = var.asg_max_size
   asg_min_size           = var.asg_min_size
+  frontend_domain        = var.frontend_domain
 }
 
 

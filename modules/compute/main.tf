@@ -51,3 +51,9 @@ resource "aws_ssm_parameter" "jwt_secret" {
   type        = "SecureString"
   value       = var.jwt_secret
 }
+
+resource "aws_ssm_parameter" "frontend_url" {
+  name  = "/${var.vpc_name}/backend/frontend_url"
+  type  = "SecureString"
+  value = "https://${var.frontend_domain}"
+}

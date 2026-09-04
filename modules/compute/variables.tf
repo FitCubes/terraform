@@ -100,3 +100,7 @@ variable "log_group_name" {
 variable "metrics_namespace" {
   type = string
 }
+
+variable "frontend_domain" {
+  type = string
+}
