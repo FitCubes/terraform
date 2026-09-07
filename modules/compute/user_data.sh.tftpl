@@ -32,55 +32,42 @@ DB_NAME=$(aws ssm get-parameter --name "${db_name_ssm_name}" --region $REGION --
 JWT_SECRET=$(aws ssm get-parameter --name "${jwt_secret_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 FRONTEND_URL=$(aws ssm get-parameter --name "${frontend_url_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 
-sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-sudo apt install ./amazon-cloudwatch-agent.deb -y
-rm amazon-cloudwatch-agent.deb
+curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
 
-cat <<-'CFG' | sudo tee /opt/aws/amazon-cloudwatch-agent/etc/config.json
-{
-    "agent": {
-    "metrics_collection_interval": 60,
-    "run_as_user": "root"
-    },
-    "metrics": {
-    "namespace": "${metrics_namespace}",
-    "append_dimensions": {
-        "AutoScalingGroupName": "$${aws:AutoScalingGroupName}"
-    },
-    "metrics_collected": {
-        "cpu": {
-        "measurement": ["cpu_usage_idle", "cpu_usage_user", "cpu_usage_system"],
-        "totalcpu": true
-        },
-        "mem": { "measurement": ["mem_used_percent"] },
-        "disk": {
-        "measurement": ["used_percent"],
-        "resources": ["/"]
-        },
-        "swap": { "measurement": ["swap_used_percent"] },
-        "netstat": { "measurement": ["tcp_established", "tcp_time_wait"] }
-    }
-    },
-    "logs": {
-    "logs_collected": {
-        "files": {
-        "collect_list": [
-            {
-            "file_path": "/var/lib/docker/containers/*/*-json.log",
-            "log_group_name": "${log_group_name}",
-            "log_stream_name": "{instance_id}",
-            "timezone": "UTC"
-            }
-        ]
-        }
-    }
-    }
-}
-CFG
-sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
-    -a fetch-config -m ec2 \
-    -c file:/opt/aws/amazon-cloudwatch-agent/etc/config.json -s
+sudo mkdir -p /etc/fluent-bit
 
+INSTANCE_ID=$(aws sts get-caller-identity --query 'Arn' --output text | awk -F/ '{print $NF}')
+
+cat <<-EOF | sudo tee /etc/fluent-bit/fluent-bit.conf
+[SERVICE]
+    Flush         5
+    Log_Level     info
+    Parsers_File  parsers.conf
+    HTTP_Server   Off
+[INPUT]
+    Name              tail
+    Path              /var/lib/docker/containers/*/*-json.log
+    Path_Key          filename
+    Parser            docker
+    Docker_Mode       On
+    Docker_Mode_Flush 4
+    Tag               docker.*
+    Refresh_Interval  5
+    Mem_Buf_Limit     50MB
+    Skip_Long_Lines   On
+[OUTPUT]
+    Name               cloudwatch_logs
+    Match              docker.*
+    region             ${region}
+    log_group_name     ${log_group_name}
+    log_stream_prefix  $INSTANCE_ID-
+    auto_create_group  true
+    log_key            log
+EOF
+
+sudo systemctl enable fluent-bit
+sudo systemctl restart fluent-bit
+sudo systemctl status fluent-bit --no-pager
 
 sudo docker run -d --name backend-java -p 8080:8080 --restart always \
     -e SPRING_DATASOURCE_URL=jdbc:postgresql://$DB_ADDRESS:${db_port}/$DB_NAME \
