@@ -46,6 +46,7 @@ resource "aws_backup_plan" "main" {
   rule {
     rule_name         = "default"
     target_vault_name = aws_backup_vault.main.name
+    enable_continuous_backup = true
     schedule          = "cron(0 2 * * ? *)"
     lifecycle {
       delete_after = 7
