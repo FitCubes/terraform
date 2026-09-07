@@ -41,7 +41,6 @@ resource "aws_launch_template" "backend" {
     elasticache_cluster_port = aws_elasticache_cluster.redis.port
     db_port                  = aws_db_instance.main.port
     region                   = var.region
-    metrics_namespace        = var.metrics_namespace
     log_group_name           = var.log_group_name
     })
   )

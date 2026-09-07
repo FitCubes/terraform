@@ -2,10 +2,11 @@ variable "log_group_name" {
   type = string
 }
 
-variable "metrics_namespace" {
+
+variable "asg_name" {
   type = string
 }
 
-variable "asg_name" {
+variable "vpc_name" {
   type = string
 }

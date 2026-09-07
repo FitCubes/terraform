@@ -158,11 +158,6 @@ variable "log_group_name" {
   default = "fitcubes/backend/ec2"
 }
 
-variable "metrics_namespace" {
-  type    = string
-  default = "FitCubes/EC2"
-}
-
 variable "cloudflare_api_key" {
   type      = string
   sensitive = true

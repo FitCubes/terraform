@@ -31,7 +31,6 @@ module "compute" {
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
   log_group_name         = var.log_group_name
-  metrics_namespace      = var.metrics_namespace
   asg_desired            = var.asg_desired
   asg_max_size           = var.asg_max_size
   asg_min_size           = var.asg_min_size
@@ -65,6 +64,6 @@ module "clodflare" {
 module "coudwatch" {
   source            = "./modules/cloudwatch"
   log_group_name    = var.log_group_name
-  metrics_namespace = var.metrics_namespace
   asg_name          = module.compute.asg_name
+  vpc_name          = var.vpc_name
 }

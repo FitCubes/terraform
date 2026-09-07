@@ -3,20 +3,25 @@ resource "aws_cloudwatch_log_group" "asg_docker" {
   retention_in_days = 7
 }
 
+resource "aws_sns_topic" "alerts" {
+  name = "${var.vpc_name}-alerts"
+}
 
 resource "aws_cloudwatch_metric_alarm" "asg_zero" {
   alarm_name  = "instance-high-cpu-usage"
-  metric_name = "cpu_usage_idle"
-  namespace   = var.metrics_namespace
+  metric_name = "CPUUtilization"
+  namespace   = "AWS/EC2"
 
   evaluation_periods = 3
   period             = 60
   statistic          = "Average"
 
-  threshold           = 20
-  comparison_operator = "LessThanOrEqualToThreshold"
+  threshold           = 80
+  comparison_operator = "GreaterThanThreshold"
 
   dimensions = {
     AutoScalingGroupName = var.asg_name
   }
+  alarm_actions = [aws_sns_topic.alerts.arn]
 }
+
