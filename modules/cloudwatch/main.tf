@@ -79,7 +79,6 @@ resource "aws_cloudwatch_metric_alarm" "high_latency_backend" {
   metric_name       = "TargetResponseTime"
   namespace         = "AWS/ApplicationELB"
   alarm_description = "backend response time p95 higher than 1s"
-  insufficient_data_actions = "OK"
 
   period              = 60
   extended_statistic = "p95"
