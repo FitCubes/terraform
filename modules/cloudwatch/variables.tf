@@ -18,3 +18,11 @@ variable "db_instance_identifier" {
 variable "alert_email" {
   type = string
 }
+
+variable "target_group_suffix" {
+  type = string
+}
+
+variable "alb_suffix" {
+  type = string
+}

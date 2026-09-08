@@ -26,3 +26,12 @@ output "asg_name" {
 output "db_instance_identifier" {
   value = aws_db_instance.main.identifier
 }
+
+
+output "target_group_suffix" {
+  value = aws_lb_target_group.backend.arn_suffix
+}
+
+output "alb_suffix" {
+  value = aws_lb.backend.arn_suffix
+}

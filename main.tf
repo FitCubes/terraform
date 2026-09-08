@@ -68,4 +68,6 @@ module "coudwatch" {
   vpc_name               = var.vpc_name
   db_instance_identifier = module.compute.db_instance_identifier
   alert_email            = var.alert_email
+  target_group_suffix    = module.compute.target_group_suffix
+  alb_suffix             = module.compute.alb_suffix
 }
