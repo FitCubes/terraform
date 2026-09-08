@@ -62,8 +62,10 @@ module "clodflare" {
 }
 
 module "coudwatch" {
-  source            = "./modules/cloudwatch"
-  log_group_name    = var.log_group_name
-  asg_name          = module.compute.asg_name
-  vpc_name          = var.vpc_name
+  source                 = "./modules/cloudwatch"
+  log_group_name         = var.log_group_name
+  asg_name               = module.compute.asg_name
+  vpc_name               = var.vpc_name
+  db_instance_identifier = module.compute.db_instance_identifier
+  alert_email            = var.alert_email
 }

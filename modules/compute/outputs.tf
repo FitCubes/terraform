@@ -22,3 +22,7 @@ output "alb_domain" {
 output "asg_name" {
   value = aws_autoscaling_group.ec2_asg.name
 }
+
+output "db_instance_identifier" {
+  value = aws_db_instance.main.identifier
+}

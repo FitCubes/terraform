@@ -167,3 +167,8 @@ variable "cloudflare_email" {
   type      = string
   sensitive = true
 }
+
+variable "alert_email" {
+  type      = string
+  sensitive = true
+}

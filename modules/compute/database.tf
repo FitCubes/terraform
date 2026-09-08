@@ -44,10 +44,10 @@ resource "aws_backup_vault" "main" {
 resource "aws_backup_plan" "main" {
   name = "${var.vpc_name}-backup"
   rule {
-    rule_name         = "default"
-    target_vault_name = aws_backup_vault.main.name
+    rule_name                = "default"
+    target_vault_name        = aws_backup_vault.main.name
     enable_continuous_backup = true
-    schedule          = "cron(0 2 * * ? *)"
+    schedule                 = "cron(0 2 * * ? *)"
     lifecycle {
       delete_after = 7
     }
