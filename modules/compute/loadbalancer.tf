@@ -25,6 +25,9 @@ resource "aws_lb" "backend" {
   security_groups                  = [aws_security_group.alb.id]
   subnets                          = [for subnet in aws_subnet.public : subnet.id]
   enable_cross_zone_load_balancing = true
+  tags = {
+    Name = "${var.vpc_name}-alb"
+  }
 }
 
 
