@@ -43,4 +43,3 @@ resource "aws_cloudwatch_metric_alarm" "zero_asg" {
   }
   alarm_actions = [aws_sns_topic.alerts.arn]
 }
-
