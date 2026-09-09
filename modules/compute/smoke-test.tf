@@ -31,7 +31,8 @@ data "aws_iam_policy_document" "smoke_lambda_policy" {
       "ssm:GetParameters",
     ]
     resources = [
-      aws_ssm_parameter.docker_sha.arn
+      aws_ssm_parameter.docker_sha.arn,
+      "${aws_ssm_parameter.docker_sha.arn}:*"
     ]
   }
   statement {
@@ -39,7 +40,9 @@ data "aws_iam_policy_document" "smoke_lambda_policy" {
     effect = "Allow"
     actions = [
       "autoscaling:CompleteLifecycleAction",
-      "autoscaling:RecordLifecycleActionHeartbeat"
+      "autoscaling:RecordLifecycleActionHeartbeat",
+      "autoscaling:DescribeInstanceRefreshes",
+      "autoscaling:CancelInstanceRefresh"
     ]
     resources = ["*"]
   }
@@ -85,6 +88,20 @@ resource "aws_lambda_function" "smoke_lambda" {
 
   timeout          = 300
   source_code_hash = data.archive_file.smoke.output_base64sha256
+
+  logging_config {
+    log_format = "Text"
+    log_group  = aws_cloudwatch_log_group.lambda_smoke.name
+  }
+
+  environment {
+    variables = {
+      DOCKER_SHA_PARAM        = "${aws_ssm_parameter.docker_sha.name}"
+      APP_PORT                = "8080"
+      HEALTH_PATH             = "/actuator/health"
+      CANCEL_INSTANCE_REFRESH = "true"
+    }
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "asg_hook" {

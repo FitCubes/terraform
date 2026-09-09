@@ -103,7 +103,7 @@ variable "frontend_domain" {
 
 variable "lambda_memody_size" {
   type    = number
-  default = 512
+  default = 128
 }
 
 variable "log_group_lamdba_smoke" {
