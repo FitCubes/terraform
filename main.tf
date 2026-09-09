@@ -55,6 +55,7 @@ module "github" {
   cloudflare_purge_token        = module.clodflare.cache_purge_token
   cloudflare_zone_id            = var.cloudflare_zone_id
   docker_sha_ssm_name           = module.compute.docker_sha_ssm_name
+  asg_name                      = module.compute.asg_name
 }
 
 module "clodflare" {

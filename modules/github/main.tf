@@ -88,3 +88,9 @@ resource "github_actions_secret" "cloudflare_zone_id" {
   secret_name = "CLOUDFLARE_ZONE_ID"
   value       = var.cloudflare_zone_id
 }
+
+resource "github_actions_secret" "asg_name" {
+  repository  = data.github_repository.backend.name
+  secret_name = "ASG_NAME"
+  value       = var.asg_name
+}
