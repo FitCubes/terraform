@@ -100,3 +100,17 @@ variable "log_group_name" {
 variable "frontend_domain" {
   type = string
 }
+
+variable "lambda_memody_size" {
+  type    = number
+  default = 512
+}
+
+variable "log_group_lamdba_smoke" {
+  type = string
+}
+
+variable "asg_hook_timeout" {
+  type    = number
+  default = 1000
+}

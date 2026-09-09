@@ -62,13 +62,3 @@ resource "aws_route_table_association" "public2" {
   subnet_id      = each.value.id
   route_table_id = aws_route_table.main.id
 }
-
-resource "aws_db_subnet_group" "postgres" {
-  name       = "${var.vpc_name}-subnet-group"
-  subnet_ids = [for subnet in aws_subnet.database : subnet.id]
-}
-
-resource "aws_elasticache_subnet_group" "redis" {
-  name       = "${var.vpc_name}-redis-cluster"
-  subnet_ids = [for subnet in aws_subnet.elasticache : subnet.id]
-}

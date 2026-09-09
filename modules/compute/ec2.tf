@@ -1,3 +1,64 @@
+data "aws_iam_policy_document" "allow_ec2_assume_role" {
+  statement {
+    sid     = "DefaultEC2Policy"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+
+resource "aws_iam_role" "ec2_ssm_role" {
+  name               = "${var.vpc_name}-ec2-role"
+  assume_role_policy = data.aws_iam_policy_document.allow_ec2_assume_role.json
+}
+
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_cloudwatch" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "${var.vpc_name}-ec2-profile"
+  role = aws_iam_role.ec2_ssm_role.name
+}
+
+
+resource "aws_cloudwatch_log_group" "asg_backend" {
+  name              = var.log_group_name
+  retention_in_days = 7
+}
+
+
+resource "aws_security_group" "backend" {
+  name   = "${var.vpc_name}-backend-sg"
+  vpc_id = aws_vpc.main.id
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
+    security_groups = [
+      aws_security_group.alb.id
+    ]
+  }
+}
+
 resource "aws_launch_template" "backend" {
   name = "${var.vpc_name}-launch-template"
 
@@ -38,10 +99,11 @@ resource "aws_launch_template" "backend" {
     db_name_ssm_name         = aws_ssm_parameter.db_name.name,
     frontend_url_ssm_name    = aws_ssm_parameter.frontend_url.name,
     jwt_secret_ssm_name      = aws_ssm_parameter.jwt_secret.name,
-    elasticache_cluster_port = aws_elasticache_cluster.redis.port
-    db_port                  = aws_db_instance.main.port
-    region                   = var.region
-    log_group_name           = var.log_group_name
+    elasticache_cluster_port = aws_elasticache_cluster.redis.port,
+    db_port                  = aws_db_instance.main.port,
+    region                   = var.region,
+    log_group_name           = var.log_group_name,
+    docker_sha_ssm_name      = aws_ssm_parameter.docker_sha.name
     })
   )
 }
@@ -74,4 +136,13 @@ resource "aws_autoscaling_group" "ec2_asg" {
       auto_rollback          = true
     }
   }
+}
+
+
+resource "aws_autoscaling_lifecycle_hook" "ec2_asg" {
+  name                   = "${var.vpc_name}-asg-lifecycle-hook"
+  autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
+  default_result         = "ABANDON"
+  heartbeat_timeout      = var.asg_hook_timeout
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
 }

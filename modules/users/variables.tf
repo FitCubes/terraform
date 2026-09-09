@@ -9,3 +9,7 @@ variable "frontend_bucket_name" {
 variable "asg_arn" {
   type = string
 }
+
+variable "docker_sha_ssm_arn" {
+  type = string
+}

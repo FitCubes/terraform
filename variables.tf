@@ -158,6 +158,11 @@ variable "log_group_name" {
   default = "fitcubes/backend/ec2"
 }
 
+variable "log_group_lambda_smoke" {
+  type    = string
+  default = "fitcubes/lambda/smoke"
+}
+
 variable "cloudflare_api_key" {
   type      = string
   sensitive = true

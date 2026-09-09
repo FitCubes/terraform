@@ -62,6 +62,25 @@ resource "aws_iam_policy" "asg_refresh" {
   name   = "asg_refresh_policy"
   policy = data.aws_iam_policy_document.backend_asg_refresh.json
 }
+
+data "aws_iam_policy_document" "allow_docker_ssm" {
+  statement {
+    sid    = "AllowWriteSSMParameter"
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameters",
+      "ssm:PutParameter",
+      "ssm:LabelParameterVersion",
+    ]
+    resources = [var.docker_sha_ssm_arn]
+  }
+}
+
+resource "aws_iam_policy" "allow_docker_ssm" {
+  name   = "allowWriteSSMdocker"
+  policy = data.aws_iam_policy_document.allow_docker_ssm.json
+}
+
 resource "aws_iam_user" "backend_asg_refresh_user" {
   name = "backend_refresh_asg_user"
 }
@@ -69,6 +88,11 @@ resource "aws_iam_user" "backend_asg_refresh_user" {
 resource "aws_iam_user_policy_attachment" "asg_refresh" {
   user       = aws_iam_user.backend_asg_refresh_user.name
   policy_arn = aws_iam_policy.asg_refresh.arn
+}
+
+resource "aws_iam_user_policy_attachment" "attach_docker_ssm" {
+  user       = aws_iam_user.backend_asg_refresh_user.name
+  policy_arn = aws_iam_policy.allow_docker_ssm.arn
 }
 
 resource "aws_iam_access_key" "asg-refresh" {

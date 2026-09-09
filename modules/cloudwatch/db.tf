@@ -19,28 +19,28 @@ resource "aws_cloudwatch_metric_alarm" "high_db_cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "low_disk_free_space" {
-  alarm_name = "low-disk-free-space"
-  alarm_description = "Only 5Gb of free space left on RDS"
+  alarm_name          = "low-disk-free-space"
+  alarm_description   = "Only 5Gb of free space left on RDS"
   comparison_operator = "LessThanThreshold"
-  alarm_actions = [aws_sns_topic.alerts.arn]
-  evaluation_periods = 2
-  threshold = 5 # Gb
+  alarm_actions       = [aws_sns_topic.alerts.arn]
+  evaluation_periods  = 2
+  threshold           = 5 # Gb
 
   metric_query {
     id = "free_space"
     metric {
       metric_name = "FreeStorageSpace"
-      namespace = "AWS/RDS"
-      period = 300
-      stat = "Average"
+      namespace   = "AWS/RDS"
+      period      = 300
+      stat        = "Average"
       dimensions = {
         DBInstanceIdentifier = var.db_instance_identifier
       }
     }
   }
   metric_query {
-    id = "free_space_gb"
-    expression = "free_space / 1000000000"
+    id          = "free_space_gb"
+    expression  = "free_space / 1000000000"
     return_data = true
   }
 }

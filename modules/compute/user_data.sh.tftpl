@@ -24,6 +24,7 @@ sudo apt update
 sudo apt install  -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 REGION=${region}
+
 DB_ADDRESS=$(aws ssm get-parameter --name "${db_address_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 DB_USERNAME=$(aws ssm get-parameter --name "${db_username_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 DB_PASSWORD=$(aws ssm get-parameter --name "${db_password_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
@@ -31,6 +32,8 @@ REDIS_ADDRESS=$(aws ssm get-parameter --name "${redis_address_ssm_name}" --regio
 DB_NAME=$(aws ssm get-parameter --name "${db_name_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 JWT_SECRET=$(aws ssm get-parameter --name "${jwt_secret_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
 FRONTEND_URL=$(aws ssm get-parameter --name "${frontend_url_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
+DOCKER_SHA=$(aws ssm get-parameter --name "${docker_sha_ssm_name}" --region $REGION --query Parameter.Value --output text --with-decryption)
+
 
 curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
 
@@ -67,7 +70,6 @@ EOF
 
 sudo systemctl enable fluent-bit
 sudo systemctl restart fluent-bit
-sudo systemctl status fluent-bit --no-pager
 
 sudo docker run -d --name backend-java -p 8080:8080 --restart always \
     -e SPRING_DATASOURCE_URL=jdbc:postgresql://$DB_ADDRESS:${db_port}/$DB_NAME \
@@ -77,4 +79,4 @@ sudo docker run -d --name backend-java -p 8080:8080 --restart always \
     -e SPRING_DATA_REDIS_PORT=${elasticache_cluster_port} \
     -e FRONTEND_URL=$FRONTEND_URL \
     -e JWT_SECRET=$JWT_SECRET \
-    fitcubes/backend:latest
+    fitcubes/backend:$DOCKER_SHA

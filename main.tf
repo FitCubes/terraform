@@ -13,6 +13,7 @@ module "users" {
   frontend_bucket_name = var.frontend_bucket_name
   frontend_bucket_arn  = module.frontend_bucket.frontend_bucket_arn
   asg_arn              = module.compute.asg_arn
+  docker_sha_ssm_arn   = module.compute.docker_sha_ssm_arn
 }
 
 module "compute" {
@@ -35,6 +36,7 @@ module "compute" {
   asg_max_size           = var.asg_max_size
   asg_min_size           = var.asg_min_size
   frontend_domain        = var.frontend_domain
+  log_group_lamdba_smoke = var.log_group_lambda_smoke
 }
 
 
@@ -52,6 +54,7 @@ module "github" {
   backend_domain                = var.backend_domain
   cloudflare_purge_token        = module.clodflare.cache_purge_token
   cloudflare_zone_id            = var.cloudflare_zone_id
+  docker_sha_ssm_name           = module.compute.docker_sha_ssm_name
 }
 
 module "clodflare" {
@@ -63,7 +66,6 @@ module "clodflare" {
 
 module "coudwatch" {
   source                 = "./modules/cloudwatch"
-  log_group_name         = var.log_group_name
   asg_name               = module.compute.asg_name
   vpc_name               = var.vpc_name
   db_instance_identifier = module.compute.db_instance_identifier

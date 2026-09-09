@@ -1,3 +1,29 @@
+
+resource "aws_db_subnet_group" "postgres" {
+  name       = "${var.vpc_name}-subnet-group"
+  subnet_ids = [for subnet in aws_subnet.database : subnet.id]
+}
+
+resource "aws_security_group" "db" {
+  name   = "${var.vpc_name}-db-sg"
+  vpc_id = aws_vpc.main.id
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.backend.id]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    "Name" = "${var.vpc_name}-db-sg"
+  }
+}
+
 data "aws_iam_policy_document" "backup_role" {
   statement {
     effect = "Allow"
@@ -49,7 +75,7 @@ resource "aws_backup_plan" "main" {
     enable_continuous_backup = true
     schedule                 = "cron(0 2 * * ? *)"
     lifecycle {
-      delete_after = 7
+      delete_after = 3
     }
   }
 }

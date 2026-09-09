@@ -35,3 +35,11 @@ output "target_group_suffix" {
 output "alb_suffix" {
   value = aws_lb.backend.arn_suffix
 }
+
+output "docker_sha_ssm_name" {
+  value = aws_ssm_parameter.docker_sha.name
+}
+
+output "docker_sha_ssm_arn" {
+  value = aws_ssm_parameter.docker_sha.arn
+}
