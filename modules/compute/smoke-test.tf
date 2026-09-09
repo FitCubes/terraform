@@ -71,8 +71,8 @@ resource "aws_iam_role_policy_attachment" "basic_lambda_policy" {
 
 data "archive_file" "smoke" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda/smoke_test"
-  output_path = "${path.module}/lambda/smoke_test.zip"
+  source_dir  = "${path.module}/lambda/smoke-test"
+  output_path = "${path.module}/lambda/smoke-test.zip"
 }
 
 resource "aws_lambda_function" "smoke_lambda" {

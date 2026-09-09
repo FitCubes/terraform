@@ -1,0 +1,3 @@
+[submodule "modules/compute/lambda/smoke-test"]
+	path = modules/compute/lambda/smoke-test
+	url = https://github.com/FitCubes/smoke-test
