@@ -62,7 +62,6 @@ resource "aws_db_instance" "main" {
   }
 }
 
-
 resource "aws_backup_vault" "main" {
   name = "${var.vpc_name}-backup-vault"
 }
@@ -75,7 +74,7 @@ resource "aws_backup_plan" "main" {
     enable_continuous_backup = true
     schedule                 = "cron(0 2 * * ? *)"
     lifecycle {
-      delete_after = 3
+      delete_after = 2
     }
   }
 }

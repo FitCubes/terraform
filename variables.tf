@@ -47,7 +47,7 @@ variable "subnets_public_cidrs" {
   default = {
     "0" = { cidr = "10.0.1.0/24", az = "eu-north-1a" }
     "1" = { cidr = "10.0.2.0/24", az = "eu-north-1b" }
-    "3" = { cidr = "10.0.6.0/24", az = "eu-north-1c" }
+    "2" = { cidr = "10.0.6.0/24", az = "eu-north-1c" }
   }
 }
 

@@ -8,6 +8,7 @@ resource "aws_vpc" "main" {
   }
 }
 
+
 resource "aws_subnet" "public" {
   for_each                = var.subnets_public_cidrs
   vpc_id                  = aws_vpc.main.id
@@ -57,7 +58,7 @@ resource "aws_route_table" "main" {
 }
 
 
-resource "aws_route_table_association" "public2" {
+resource "aws_route_table_association" "public" {
   for_each       = aws_subnet.public
   subnet_id      = each.value.id
   route_table_id = aws_route_table.main.id
