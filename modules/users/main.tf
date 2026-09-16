@@ -49,12 +49,18 @@ data "aws_iam_policy_document" "backend_asg_refresh" {
     actions = [
       "autoscaling:StartInstanceRefresh",
       "autoscaling:CancelInstanceRefresh",
+    ]
+    resources = [var.asg_arn]
+  }
+
+  statement {
+    sid    = "AllowDescribeAsg"
+    effect = "Allow"
+    actions = [
       "autoscaling:DescribeInstanceRefreshes",
-      "autoscaling:DescribeAutoScalingGroups"
+      "autoscaling:DescribeAutoScalingGroups",
     ]
-    resources = [
-      var.asg_arn
-    ]
+    resources = ["*"]
   }
 }
 

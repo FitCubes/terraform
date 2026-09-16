@@ -100,6 +100,7 @@ resource "aws_lambda_function" "smoke_lambda" {
       APP_PORT                = "8080"
       HEALTH_PATH             = "/actuator/health"
       CANCEL_INSTANCE_REFRESH = "true"
+      POLL_INTERVAL_SECONDS   = "15"
     }
   }
 }

@@ -71,6 +71,6 @@ variable "docker_sha_ssm_name" {
 }
 
 variable "asg_name" {
-  type = string
+  type      = string
   sensitive = true
 }
