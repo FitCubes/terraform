@@ -11,7 +11,9 @@ resource "aws_security_group" "db" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.backend.id]
+    security_groups = [
+      aws_security_group.ecs_ec2.id
+    ]
   }
   egress {
     from_port   = 0

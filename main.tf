@@ -9,11 +9,8 @@ module "frontend_bucket" {
 }
 
 module "users" {
-  source               = "./modules/users"
-  frontend_bucket_name = var.frontend_bucket_name
-  frontend_bucket_arn  = module.frontend_bucket.frontend_bucket_arn
-  asg_arn              = module.compute.asg_arn
-  docker_sha_ssm_arn   = module.compute.docker_sha_ssm_arn
+  source              = "./modules/users"
+  frontend_bucket_arn = module.frontend_bucket.frontend_bucket_arn
 }
 
 module "compute" {
@@ -24,19 +21,17 @@ module "compute" {
   subnets_public_cidrs   = var.subnets_public_cidrs
   subnets_database_cidrs = var.subnets_database_cidrs
   elasticache_cidrs      = var.elasticache_cidrs
-  instance_type          = var.instance_type
-  ami                    = var.ami
-  user_data_path         = var.user_data_path
+  frontend_domain        = var.frontend_domain
   postgres_password      = var.postgres_password
   postgres_username      = var.postgres_username
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
-  log_group_name         = var.log_group_name
-  asg_desired            = var.asg_desired
-  asg_max_size           = var.asg_max_size
-  asg_min_size           = var.asg_min_size
-  frontend_domain        = var.frontend_domain
+
+  instance_type = var.instance_type
+
   log_group_lamdba_smoke = var.log_group_lambda_smoke
+
+  repository_name = var.repository_name
 }
 
 
@@ -54,8 +49,6 @@ module "github" {
   backend_domain                = var.backend_domain
   cloudflare_purge_token        = module.clodflare.cache_purge_token
   cloudflare_zone_id            = var.cloudflare_zone_id
-  docker_sha_ssm_name           = module.compute.docker_sha_ssm_name
-  asg_name                      = module.compute.asg_name
 }
 
 module "clodflare" {
@@ -67,10 +60,7 @@ module "clodflare" {
 
 module "coudwatch" {
   source                 = "./modules/cloudwatch"
-  asg_name               = module.compute.asg_name
   vpc_name               = var.vpc_name
   db_instance_identifier = module.compute.db_instance_identifier
   alert_email            = var.alert_email
-  target_group_suffix    = module.compute.target_group_suffix
-  alb_suffix             = module.compute.alb_suffix
 }

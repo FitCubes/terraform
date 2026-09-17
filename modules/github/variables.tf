@@ -64,13 +64,3 @@ variable "cloudflare_zone_id" {
   type      = string
   sensitive = true
 }
-
-variable "docker_sha_ssm_name" {
-  type      = string
-  sensitive = true
-}
-
-variable "asg_name" {
-  type      = string
-  sensitive = true
-}

@@ -47,12 +47,6 @@ resource "github_actions_secret" "backend_region" {
   value       = var.aws_region
 }
 
-resource "github_actions_secret" "docker_sha_ssm_name" {
-  repository  = data.github_repository.backend.name
-  secret_name = "DOCKER_SHA_SSM_NAME"
-  value       = var.docker_sha_ssm_name
-}
-
 resource "github_actions_secret" "dockerhub_username" {
   repository  = data.github_repository.backend.name
   secret_name = "DOCKERHUB_USERNAME"
@@ -87,10 +81,4 @@ resource "github_actions_secret" "cloudflare_zone_id" {
   repository  = data.github_repository.frontend.name
   secret_name = "CLOUDFLARE_ZONE_ID"
   value       = var.cloudflare_zone_id
-}
-
-resource "github_actions_secret" "asg_name" {
-  repository  = data.github_repository.backend.name
-  secret_name = "ASG_NAME"
-  value       = var.asg_name
 }

@@ -12,20 +12,6 @@ resource "aws_ssm_parameter" "db_username" {
   value       = aws_db_instance.main.username
 }
 
-resource "aws_ssm_parameter" "db_address" {
-  name        = "/${var.vpc_name}/database/address"
-  description = "Database Address"
-  type        = "SecureString"
-  value       = aws_db_instance.main.address
-}
-
-resource "aws_ssm_parameter" "db_name" {
-  name        = "/${var.vpc_name}/database/name"
-  description = "Database Name"
-  type        = "SecureString"
-  value       = aws_db_instance.main.db_name
-}
-
 resource "aws_ssm_parameter" "redis_address" {
   name        = "/${var.vpc_name}/redis/address"
   description = "Redis Address"
@@ -46,11 +32,8 @@ resource "aws_ssm_parameter" "frontend_url" {
   value = "https://${var.frontend_domain}"
 }
 
-resource "aws_ssm_parameter" "docker_sha" {
-  name  = "/${var.vpc_name}/backend/docker_sha"
-  type  = "String"
-  value = "latest"
-  lifecycle {
-    ignore_changes = [value]
-  }
+resource "aws_ssm_parameter" "datasource_url" {
+  name  = "/${var.vpc_name}/backend/datasource_url"
+  type  = "SecureString"
+  value = "jdbc:postgresql://${aws_db_instance.main.address}:${aws_db_instance.main.port}/${aws_db_instance.main.db_name}"
 }

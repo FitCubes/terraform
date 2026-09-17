@@ -31,30 +31,9 @@ variable "elasticache_cidrs" {
   }))
 }
 
-variable "ami" {
-  type    = string
-  default = "ami-01ddfb2eb6deb865c"
-}
-
 variable "instance_type" {
   type    = string
   default = "t3.micro"
-}
-
-variable "asg_min_size" {
-  type = number
-}
-
-variable "asg_max_size" {
-  type = number
-}
-
-variable "asg_desired" {
-  type = number
-}
-
-variable "user_data_path" {
-  type = string
 }
 
 variable "postgres_version" {
@@ -93,10 +72,6 @@ variable "jwt_secret" {
   type = string
 }
 
-variable "log_group_name" {
-  type = string
-}
-
 variable "frontend_domain" {
   type = string
 }
@@ -110,7 +85,12 @@ variable "log_group_lamdba_smoke" {
   type = string
 }
 
-variable "asg_hook_timeout" {
-  type    = number
-  default = 1000
+variable "log_group_name_ecs" {
+  type    = string
+  default = "fitcubes/ecs/backend"
+}
+
+variable "repository_name" {
+  type      = string
+  sensitive = true
 }
