@@ -64,3 +64,18 @@ variable "cloudflare_zone_id" {
   type      = string
   sensitive = true
 }
+
+variable "ecs_task_definition" {
+  type = string
+  sensitive = true
+}
+
+variable "ecs_cluster_name" {
+  type =   string
+  sensitive = true
+}
+
+variable "ecs_service_name" {
+  type = string
+  sensitive = true
+}

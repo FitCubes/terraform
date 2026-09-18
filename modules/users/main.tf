@@ -41,18 +41,48 @@ resource "aws_iam_access_key" "frontend_bucket_user_access_key" {
   user = aws_iam_user.frontend_bucket_user.name
 }
 
-
-
-
-
-
-
-
 resource "aws_iam_user" "backend_asg_refresh_user" {
   name = "backend_refresh_asg_user"
 }
 
+data "aws_iam_policy_document" "ecs_deploy" {
+  statement {
+    sid = "AllowDeployECS"
+    effect = "Allow"
+    actions = [
+      "ecs:DescribeServices",
+      "ecs:UpdateService"
+    ]
+    resources = [
+      var.ecs_service_arn,
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:DescribeTaskDefinition",
+      "ecs:RegisterTaskDefinition"
+    ]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = ["iam:PassRole"]
+    resources = [
+     var.esc_task_execution_role
+    ]
+  }
+}
 
+resource "aws_iam_policy" "ecs_deploy" {
+  name = "ecs-deploy-policy"
+  policy = data.aws_iam_policy_document.ecs_deploy.json
+}
+
+resource "aws_iam_user_policy_attachment" "ecs_deploy" {
+  user = aws_iam_user.backend_asg_refresh_user.name
+  policy_arn = aws_iam_policy.ecs_deploy.arn
+}
 
 resource "aws_iam_access_key" "asg-refresh" {
   user = aws_iam_user.backend_asg_refresh_user.name

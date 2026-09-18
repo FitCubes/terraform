@@ -47,6 +47,24 @@ resource "github_actions_secret" "backend_region" {
   value       = var.aws_region
 }
 
+resource "github_actions_secret" "ecs_task_definition" {
+  repository = data.github_repository.backend.name
+  secret_name = "ECS_TASK_DEFINITION_NAME"
+  value = var.ecs_task_definition
+}
+
+resource "github_actions_secret" "ecs_cluster_name" {
+  repository = data.github_repository.backend.name
+  secret_name = "ECS_CLUSTER_NAME"
+  value = var.ecs_cluster_name
+}
+
+resource "github_actions_secret" "ecs_service_name" {
+  repository = data.github_repository.backend.name
+  secret_name = "ECS_SERVICE_NAME"
+  value = var.ecs_service_name
+}
+
 resource "github_actions_secret" "dockerhub_username" {
   repository  = data.github_repository.backend.name
   secret_name = "DOCKERHUB_USERNAME"

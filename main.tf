@@ -11,6 +11,8 @@ module "frontend_bucket" {
 module "users" {
   source              = "./modules/users"
   frontend_bucket_arn = module.frontend_bucket.frontend_bucket_arn
+  ecs_service_arn         = module.compute.ecs_service_arn
+  esc_task_execution_role = module.compute.esc_task_execution_role
 }
 
 module "compute" {
@@ -49,6 +51,9 @@ module "github" {
   backend_domain                = var.backend_domain
   cloudflare_purge_token        = module.clodflare.cache_purge_token
   cloudflare_zone_id            = var.cloudflare_zone_id
+  ecs_task_definition           = module.compute.ecs_task_definition_name
+  ecs_cluster_name              = module.compute.ecs_cluster_name
+  ecs_service_name              = module.compute.ecs_service_name
 }
 
 module "clodflare" {
@@ -63,4 +68,6 @@ module "coudwatch" {
   vpc_name               = var.vpc_name
   db_instance_identifier = module.compute.db_instance_identifier
   alert_email            = var.alert_email
+  ecs_cluster_name       = module.compute.ecs_cluster_name
+  ecs_service_name       = module.compute.ecs_service_name
 }
