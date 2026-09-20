@@ -18,5 +18,4 @@ variable "alb_domain" {
 
 variable "backend_record_name" {
   type    = string
-  default = "alb"
 }

@@ -142,3 +142,7 @@ variable "alert_email" {
   type      = string
   sensitive = true
 }
+
+variable "backend_record_name" {
+  type = string
+}

@@ -1,3 +1,7 @@
+locals {
+  backend_domain = "${var.backend_record_name}.${var.frontend_domain}"
+}
+
 module "tf_backend" {
   source              = "./modules/remote_backend"
   backend_bucket_name = var.backend_bucket_name
@@ -9,8 +13,8 @@ module "frontend_bucket" {
 }
 
 module "users" {
-  source              = "./modules/users"
-  frontend_bucket_arn = module.frontend_bucket.frontend_bucket_arn
+  source                  = "./modules/users"
+  frontend_bucket_arn     = module.frontend_bucket.frontend_bucket_arn
   ecs_service_arn         = module.compute.ecs_service_arn
   esc_task_execution_role = module.compute.esc_task_execution_role
 }
@@ -28,11 +32,10 @@ module "compute" {
   postgres_username      = var.postgres_username
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
+  backend_domain         = var.backend_domain
 
   instance_type = var.instance_type
-
   log_group_lamdba_smoke = var.log_group_lambda_smoke
-
   repository_name = var.repository_name
 }
 
@@ -61,6 +64,7 @@ module "clodflare" {
   frontent_bucket_domain = module.frontend_bucket.frontend_link
   cloudflare_zone_id     = var.cloudflare_zone_id
   alb_domain             = module.compute.alb_domain
+  backend_record_name    = var.backend_record_name
 }
 
 module "coudwatch" {

@@ -47,7 +47,7 @@ resource "aws_iam_user" "backend_asg_refresh_user" {
 
 data "aws_iam_policy_document" "ecs_deploy" {
   statement {
-    sid = "AllowDeployECS"
+    sid    = "AllowDeployECS"
     effect = "Allow"
     actions = [
       "ecs:DescribeServices",
@@ -66,21 +66,21 @@ data "aws_iam_policy_document" "ecs_deploy" {
     resources = ["*"]
   }
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["iam:PassRole"]
     resources = [
-     var.esc_task_execution_role
+      var.esc_task_execution_role
     ]
   }
 }
 
 resource "aws_iam_policy" "ecs_deploy" {
-  name = "ecs-deploy-policy"
+  name   = "ecs-deploy-policy"
   policy = data.aws_iam_policy_document.ecs_deploy.json
 }
 
 resource "aws_iam_user_policy_attachment" "ecs_deploy" {
-  user = aws_iam_user.backend_asg_refresh_user.name
+  user       = aws_iam_user.backend_asg_refresh_user.name
   policy_arn = aws_iam_policy.ecs_deploy.arn
 }
 

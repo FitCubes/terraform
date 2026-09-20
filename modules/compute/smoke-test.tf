@@ -20,29 +20,6 @@ resource "aws_iam_role" "lambda_smoke" {
   assume_role_policy = data.aws_iam_policy_document.lambda_smoke_role.json
 }
 
-
-data "aws_iam_policy_document" "smoke_lambda_policy" {
-  statement {
-    sid    = "AllowReadRunCommandResult"
-    effect = "Allow"
-    actions = [
-      "ssm:GetCommandInvocation",
-      "ssm:SendCommand"
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "smoke_lambda" {
-  name   = "${var.vpc_name}-revert-docker-ssm"
-  policy = data.aws_iam_policy_document.smoke_lambda_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "attach_lambda_smoke" {
-  role       = aws_iam_role.lambda_smoke.name
-  policy_arn = aws_iam_policy.smoke_lambda.arn
-}
-
 resource "aws_iam_role_policy_attachment" "basic_lambda_policy" {
   role       = aws_iam_role.lambda_smoke.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -72,10 +49,9 @@ resource "aws_lambda_function" "smoke_lambda" {
 
   environment {
     variables = {
-      APP_PORT                = "8080"
-      HEALTH_PATH             = "/actuator/health"
-      CANCEL_INSTANCE_REFRESH = "true"
-      POLL_INTERVAL_SECONDS   = "15"
+      TEST_DOMAIN      = "${var.backend_domain}"
+      SMOKE_CHECK_PATH = "/api/auth/login"
+      MAX_ATTEMPTS     = "15"
     }
   }
 }

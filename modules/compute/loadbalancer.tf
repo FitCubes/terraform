@@ -28,7 +28,6 @@ resource "aws_lb" "backend" {
   }
 }
 
-
 resource "aws_lb_listener" "backend" {
   load_balancer_arn = aws_lb.backend.arn
   port              = "80"
@@ -51,11 +50,50 @@ resource "aws_lb_listener_rule" "forward_to_api" {
 
   condition {
     path_pattern {
-      values = ["/api", "/api/*"]
+      values = ["/api/v1", "/api/v1/*"]
     }
   }
   action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ecs_ec2.arn
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.ecs_ec2_blue.arn
+        weight = 100
+      }
+      target_group {
+        arn    = aws_lb_target_group.ecs_ec2_green.arn
+        weight = 0
+      }
+    }
+  }
+  lifecycle {
+    ignore_changes = [ action[0].forward ]
+  }
+}
+
+resource "aws_lb_listener_rule" "test" {
+  listener_arn = aws_lb_listener.backend.arn
+  priority     = 20
+
+  condition {
+    path_pattern {
+      values = ["/api/", "/api/*"]
+    }
+  }
+  action {
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.ecs_ec2_blue.arn
+        weight = 100
+      }
+      target_group {
+        arn    = aws_lb_target_group.ecs_ec2_green.arn
+        weight = 0
+      }
+    }
+  }
+  lifecycle {
+    ignore_changes = [ action[0].forward ]
   }
 }

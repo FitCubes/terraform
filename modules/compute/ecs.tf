@@ -23,6 +23,44 @@ resource "aws_security_group" "ecs_ec2" {
   }
 }
 
+# ======================= TARGET GROUPS =============================
+
+resource "aws_lb_target_group" "ecs_ec2_blue" {
+  name        = "${var.vpc_name}-ecs-blue-tg"
+  port        = 8080
+  protocol    = "HTTP"
+  target_type = "instance"
+  vpc_id      = aws_vpc.main.id
+  health_check {
+    enabled             = true
+    path                = "/actuator/health"
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    interval            = "30"
+    timeout             = "5"
+    healthy_threshold   = "2"
+    unhealthy_threshold = "3"
+  }
+}
+
+resource "aws_lb_target_group" "ecs_ec2_green" {
+  name        = "${var.vpc_name}-ecs-green-tg"
+  port        = 8080
+  protocol    = "HTTP"
+  target_type = "instance"
+  vpc_id      = aws_vpc.main.id
+  health_check {
+    enabled             = true
+    path                = "/actuator/health"
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    interval            = "30"
+    timeout             = "5"
+    healthy_threshold   = "2"
+    unhealthy_threshold = "3"
+  }
+}
+
 # ======================= POLICIES =============================
 
 #  === EC2 ===
@@ -110,28 +148,114 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_ssm" {
   policy_arn = aws_iam_policy.ecs_task_execution_ssm.arn
 }
 
+# ECS SERVICE START LAMBDA
+data "aws_iam_policy_document" "role_ecs_run_lambda" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["ecs.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_invoke_lambda" {
+  name               = "${var.vpc_name}-ecs-allow-invoke-lambda"
+  assume_role_policy = data.aws_iam_policy_document.role_ecs_run_lambda.json
+}
+
+data "aws_iam_policy_document" "ecs_allow_invoke" {
+  statement {
+    effect  = "Allow"
+    actions = ["lambda:InvokeFunction"]
+    resources = [
+      aws_lambda_function.smoke_lambda.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ecs_allow_invoke_lambda" {
+  name   = "${var.vpc_name}-allow-invoke-lambda"
+  policy = data.aws_iam_policy_document.ecs_allow_invoke.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_allow_invoke_lambda" {
+  role       = aws_iam_role.ecs_invoke_lambda.name
+  policy_arn = aws_iam_policy.ecs_allow_invoke_lambda.arn
+}
+
+# ECS SERVICE LB
+data "aws_iam_policy_document" "role_ecs_lb" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["ecs.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_lb" {
+  name               = "${var.vpc_name}-ecs-lb"
+  assume_role_policy = data.aws_iam_policy_document.role_ecs_lb.json
+}
+
+data "aws_iam_policy_document" "ecs_lb" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeRules",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetHealth"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:ModifyListener",
+      "elasticloadbalancing:ModifyRule",
+
+    ]
+    resources = [
+      aws_lb_listener.backend.arn,
+      aws_lb_listener_rule.forward_to_api.arn,
+      aws_lb_listener_rule.test.arn
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:RegisterTargets",
+      "elasticloadbalancing:DeregisterTargets"
+    ]
+    resources = [
+      aws_lb_target_group.ecs_ec2_blue.arn,
+      aws_lb_target_group.ecs_ec2_green.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ecs_lb" {
+  name   = "${var.vpc_name}-ecs-lb"
+  policy = data.aws_iam_policy_document.ecs_lb.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_lb" {
+  role       = aws_iam_role.ecs_lb.name
+  policy_arn = aws_iam_policy.ecs_lb.arn
+}
+
 # ======================= INSTANCE =============================
 data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
 }
 
-resource "aws_lb_target_group" "ecs_ec2" {
-  name        = "${var.vpc_name}-ecs-ec2-tg"
-  port        = 8080
-  protocol    = "HTTP"
-  target_type = "instance"
-  vpc_id      = aws_vpc.main.id
-  health_check {
-    enabled             = true
-    path                = "/actuator/health"
-    protocol            = "HTTP"
-    port                = "traffic-port"
-    interval            = "30"
-    timeout             = "5"
-    healthy_threshold   = "2"
-    unhealthy_threshold = "3"
-  }
-}
 
 resource "aws_launch_template" "ecs_ec2" {
   name = "${var.vpc_name}-ecs-ec2-backend"
@@ -155,9 +279,6 @@ resource "aws_launch_template" "ecs_ec2" {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.ecs_ec2.id]
   }
-  tags = {
-    Name = "${var.vpc_name}-ECS"
-  }
 }
 
 resource "aws_autoscaling_group" "ecs_ec2_capacity" {
@@ -166,7 +287,7 @@ resource "aws_autoscaling_group" "ecs_ec2_capacity" {
   max_size              = 10
   desired_capacity      = 1
   protect_from_scale_in = true
-  vpc_zone_identifier = [for subnet in aws_subnet.public : subnet.id]
+  vpc_zone_identifier   = [for subnet in aws_subnet.public : subnet.id]
   launch_template {
     id      = aws_launch_template.ecs_ec2.id
     version = "$Latest"
@@ -174,6 +295,11 @@ resource "aws_autoscaling_group" "ecs_ec2_capacity" {
   tag {
     key                 = "AmazonECSManaged"
     value               = true
+    propagate_at_launch = true
+  }
+  tag {
+    key                 = "Name"
+    value               = "ECSProvisioned"
     propagate_at_launch = true
   }
 }
@@ -206,7 +332,7 @@ resource "aws_ecs_cluster" "backend" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs_cluster" {
-  name = "/${var.vpc_name}/ecs/cluster"
+  name              = "/${var.vpc_name}/ecs/cluster"
   retention_in_days = 3
 }
 
@@ -226,9 +352,9 @@ resource "aws_ecs_task_definition" "backend" {
     {
       name      = "backend-java"
       essential = true
-      image     = "${var.repository_name}:latest"
+      image     = "${var.repository_name}:sha-4846ce0"
 
-      cpu               = 128
+      cpu               = 512
       memoryReservation = 512
       memory            = 1024
 
@@ -237,7 +363,6 @@ resource "aws_ecs_task_definition" "backend" {
         hostPort      = 0
         protocol      = "tcp"
       }]
-
       environment = [
         {
           name  = "SPRING_DATA_REDIS_PORT"
@@ -298,9 +423,15 @@ resource "aws_ecs_service" "backend" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_ec2.arn
+    target_group_arn = aws_lb_target_group.ecs_ec2_blue.arn
     container_name   = "backend-java"
     container_port   = 8080
+    advanced_configuration {
+      alternate_target_group_arn = aws_lb_target_group.ecs_ec2_green.arn
+      production_listener_rule   = aws_lb_listener_rule.forward_to_api.arn
+      test_listener_rule         = aws_lb_listener_rule.test.arn
+      role_arn                   = aws_iam_role.ecs_lb.arn
+    }
   }
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.ecs_backend.name
@@ -308,32 +439,46 @@ resource "aws_ecs_service" "backend" {
     weight            = 1
   }
 
-
-  lifecycle {
-    ignore_changes = [ task_definition ]
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
   }
 
-  deployment_circuit_breaker {
-    enable = true
-    rollback = true
+  deployment_configuration {
+    strategy             = "BLUE_GREEN"
+    bake_time_in_minutes = 2
+
+
+    lifecycle_hook {
+      hook_target_arn  = aws_lambda_function.smoke_lambda.arn
+      lifecycle_stages = ["POST_TEST_TRAFFIC_SHIFT"]
+      role_arn         = aws_iam_role.ecs_invoke_lambda.arn
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # task_definition,
+      desired_count
+    ]
   }
 }
 
 # AutoScaling
 resource "aws_appautoscaling_target" "ecs_scale" {
-  min_capacity = 1
-  max_capacity = 2
-  resource_id = "service/${aws_ecs_cluster.backend.name}/${aws_ecs_service.backend.name}"
+  min_capacity       = 1
+  max_capacity       = 2
+  resource_id        = "service/${aws_ecs_cluster.backend.name}/${aws_ecs_service.backend.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace = "ecs"
+  service_namespace  = "ecs"
 }
 
 resource "aws_appautoscaling_policy" "ecs_scaling_cpu" {
-  name = "${var.vpc_name}-ecs-cpu-scaling"
-  policy_type = "TargetTrackingScaling"
-  resource_id = aws_appautoscaling_target.ecs_scale.id
+  name               = "${var.vpc_name}-ecs-cpu-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_scale.id
   scalable_dimension = aws_appautoscaling_target.ecs_scale.scalable_dimension
-  service_namespace = aws_appautoscaling_target.ecs_scale.service_namespace
+  service_namespace  = aws_appautoscaling_target.ecs_scale.service_namespace
 
   target_tracking_scaling_policy_configuration {
     target_value = 70
@@ -341,25 +486,25 @@ resource "aws_appautoscaling_policy" "ecs_scaling_cpu" {
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-    scale_in_cooldown = 300
-    scale_out_cooldown = 60
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 300
   }
 }
 
 resource "aws_appautoscaling_policy" "ecs_scaling_memory" {
-  name = "${var.vpc_name}-ecs-memory-scaling"
-  policy_type = "TargetTrackingScaling"
-  resource_id = aws_appautoscaling_target.ecs_scale.id
+  name               = "${var.vpc_name}-ecs-memory-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_scale.id
   scalable_dimension = aws_appautoscaling_target.ecs_scale.scalable_dimension
-  service_namespace = aws_appautoscaling_target.ecs_scale.service_namespace
+  service_namespace  = aws_appautoscaling_target.ecs_scale.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value = 70
+    target_value = 85
 
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
-    scale_in_cooldown = 300
-    scale_out_cooldown = 60
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 300
   }
 }
