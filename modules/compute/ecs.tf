@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "backend_ecs" {
   name              = var.log_group_name_ecs
-  retention_in_days = 3
+  retention_in_days = var.logs_retention_days
 }
 
 # ======================= SG =============================
@@ -284,7 +284,7 @@ resource "aws_launch_template" "ecs_ec2" {
 resource "aws_autoscaling_group" "ecs_ec2_capacity" {
   name                  = "${var.vpc_name}-asg-ecs-ec2"
   min_size              = 0
-  max_size              = 10
+  max_size              = var.max_asg_size
   desired_capacity      = 1
   protect_from_scale_in = true
   vpc_zone_identifier   = [for subnet in aws_subnet.public : subnet.id]
@@ -333,7 +333,7 @@ resource "aws_ecs_cluster" "backend" {
 
 resource "aws_cloudwatch_log_group" "ecs_cluster" {
   name              = "/${var.vpc_name}/ecs/cluster"
-  retention_in_days = 3
+  retention_in_days = var.logs_retention_days
 }
 
 resource "aws_ecs_cluster_capacity_providers" "ecs_ec2_capacity" {
@@ -406,6 +406,86 @@ resource "aws_ecs_task_definition" "backend" {
     }
   ])
 }
+
+# Alarm
+resource "aws_cloudwatch_metric_alarm" "high_5XX" {
+  alarm_name = "${var.vpc_name}-high-5xx"
+  alarm_description = "Error rate > ${var.rate_5xx_percent}%"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods = 2
+  threshold = var.rate_5xx_percent
+
+  metric_query {
+    id = "err_blue"
+    label = "Errors Blue"
+    metric {
+      metric_name = "HTTPCode_Target_5XX_Count"
+      namespace = "AWS/ApplicationELB"
+      period = 60
+      stat = "Sum"
+      dimensions = {
+        TargetGroup = aws_lb_target_group.ecs_ec2_blue.arn_suffix
+        LoadBalancer = aws_lb.backend.arn_suffix
+      }
+    }
+  }
+  metric_query {
+    id = "err_green"
+    label = "Errors Green"
+    metric {
+      metric_name = "HTTPCode_Target_5XX_Count"
+      namespace = "AWS/ApplicationELB"
+      period = 60
+      stat = "Sum"
+      dimensions = {
+        TargetGroup = aws_lb_target_group.ecs_ec2_green.arn_suffix
+        LoadBalancer = aws_lb.backend.arn_suffix
+      }
+    }
+  }
+  metric_query {
+    id = "request_blue"
+    label = "Total Blue"
+    metric {
+      metric_name = "RequestCount"
+      namespace = "AWS/ApplicationELB"
+      period = 60
+      stat = "Sum"
+      dimensions = {
+        TargetGroup = aws_lb_target_group.ecs_ec2_blue.arn_suffix
+        LoadBalancer = aws_lb.backend.arn_suffix
+      }
+    }
+  }
+  metric_query {
+    id = "request_green"
+    label = "Total Green"
+    metric {
+      metric_name = "RequestCount"
+      namespace = "AWS/ApplicationELB"
+      period = 60
+      stat = "Sum"
+      dimensions = {
+        TargetGroup = aws_lb_target_group.ecs_ec2_green.arn_suffix
+        LoadBalancer = aws_lb.backend.arn_suffix
+      }
+    }
+  }
+  metric_query {
+    id = "requests"
+    expression = "FILL(request_blue, 0) + FILL(request_green, 0)"
+  }
+  metric_query {
+    id = "errors"
+    expression = "FILL(err_blue , 0) + FILL(err_green, 0)"
+  }
+  metric_query {
+    id = "rate"
+    expression = "IF(requests > 20, errors / requests * 100, 0)"
+    return_data = true
+  }
+}
+
 # Service
 resource "aws_ecs_service" "backend" {
   name    = "${var.vpc_name}-ecs-service"
@@ -446,8 +526,7 @@ resource "aws_ecs_service" "backend" {
 
   deployment_configuration {
     strategy             = "BLUE_GREEN"
-    bake_time_in_minutes = 2
-
+    bake_time_in_minutes = 3
 
     lifecycle_hook {
       hook_target_arn  = aws_lambda_function.smoke_lambda.arn
@@ -456,9 +535,17 @@ resource "aws_ecs_service" "backend" {
     }
   }
 
+  alarms {
+    enable = true
+    rollback = true
+    alarm_names = [
+      aws_cloudwatch_metric_alarm.high_5XX.alarm_name
+    ]
+  }
+
   lifecycle {
     ignore_changes = [
-      # task_definition,
+      task_definition,
       desired_count
     ]
   }
@@ -466,8 +553,8 @@ resource "aws_ecs_service" "backend" {
 
 # AutoScaling
 resource "aws_appautoscaling_target" "ecs_scale" {
-  min_capacity       = 1
-  max_capacity       = 2
+  min_capacity       = var.min_appautoscaling_capacity
+  max_capacity       = var.max_appautoscaling_capacity
   resource_id        = "service/${aws_ecs_cluster.backend.name}/${aws_ecs_service.backend.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
@@ -481,7 +568,7 @@ resource "aws_appautoscaling_policy" "ecs_scaling_cpu" {
   service_namespace  = aws_appautoscaling_target.ecs_scale.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value = 70
+    target_value = var.appautoscaling_cpu_threshold
 
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
@@ -499,7 +586,7 @@ resource "aws_appautoscaling_policy" "ecs_scaling_memory" {
   service_namespace  = aws_appautoscaling_target.ecs_scale.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value = 85
+    target_value = var.appautoscaling_memory_threshold
 
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageMemoryUtilization"

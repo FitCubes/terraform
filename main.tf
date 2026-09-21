@@ -32,7 +32,7 @@ module "compute" {
   postgres_username      = var.postgres_username
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
-  backend_domain         = var.backend_domain
+  backend_domain         = local.backend_domain
 
   instance_type = var.instance_type
   log_group_lamdba_smoke = var.log_group_lambda_smoke
@@ -51,7 +51,7 @@ module "github" {
   dockerhub_token               = var.dockerhub_token
   dockerhub_username            = var.dockerhub_username
   repository_name               = var.repository_name
-  backend_domain                = var.backend_domain
+  backend_domain                = local.backend_domain
   cloudflare_purge_token        = module.clodflare.cache_purge_token
   cloudflare_zone_id            = var.cloudflare_zone_id
   ecs_task_definition           = module.compute.ecs_task_definition_name

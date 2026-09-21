@@ -112,11 +112,6 @@ variable "frontend_domain" {
   type = string
 }
 
-
-variable "backend_domain" {
-  type = string
-}
-
 variable "cloudflare_zone_id" {
   type      = string
   sensitive = true

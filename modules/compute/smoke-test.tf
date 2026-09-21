@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "lambda_smoke" {
   name              = var.log_group_lamdba_smoke
-  retention_in_days = 7
+  retention_in_days = var.logs_retention_days
 }
 
 data "aws_iam_policy_document" "lambda_smoke_role" {
