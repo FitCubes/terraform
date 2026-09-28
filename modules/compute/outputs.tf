@@ -37,3 +37,11 @@ output "ecs_service_arn" {
 output "esc_task_execution_role" {
   value = aws_iam_role.ecs_task_execution_role.arn
 }
+
+output "ses_dkim_tokens" {
+  value = aws_sesv2_email_identity.backend.dkim_signing_attributes[0].tokens
+}
+
+output "ses_email_from" {
+  value = aws_sesv2_email_identity_mail_from_attributes.backend.mail_from_domain
+}

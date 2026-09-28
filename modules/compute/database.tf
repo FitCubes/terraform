@@ -59,6 +59,7 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [aws_security_group.db.id]
   db_subnet_group_name   = aws_db_subnet_group.postgres.name
   db_name                = var.postgres_db_name
+  //multi_az = true      // Enable to create standby replica in other AZ
   tags = {
     Backup = "True"
   }

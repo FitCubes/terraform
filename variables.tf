@@ -141,3 +141,9 @@ variable "alert_email" {
 variable "backend_record_name" {
   type = string
 }
+
+
+variable "ses_email_subdomain" {
+  type = string
+  default = "no-reply"
+}

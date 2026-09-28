@@ -33,7 +33,7 @@ module "compute" {
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
   backend_domain         = local.backend_domain
-
+  ses_email_subdomain = var.ses_email_subdomain
   instance_type = var.instance_type
   log_group_lamdba_smoke = var.log_group_lambda_smoke
   repository_name = var.repository_name
@@ -65,6 +65,9 @@ module "clodflare" {
   cloudflare_zone_id     = var.cloudflare_zone_id
   alb_domain             = module.compute.alb_domain
   backend_record_name    = var.backend_record_name
+  ses_dkim_tokens        = module.compute.ses_dkim_tokens
+  ses_email_subdomain    = var.ses_email_subdomain
+  region                 = var.region
 }
 
 module "coudwatch" {

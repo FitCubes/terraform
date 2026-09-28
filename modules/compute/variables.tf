@@ -99,13 +99,18 @@ variable "repository_name" {
   sensitive = true
 }
 
+variable "healthy_tag" {
+  type = string
+  default = "sha-4846ce0"
+}
+
 variable "backend_domain" {
   type = string
 }
 
 variable "max_asg_size" {
   type = number
-  default = 10
+  default = 1
 }
 
 variable "rate_5xx_percent" {
@@ -130,5 +135,10 @@ variable "appautoscaling_cpu_threshold" {
 
 variable "appautoscaling_memory_threshold" {
   type = number
-  default = 80
+  default = 95
+}
+
+variable "ses_email_subdomain" {
+  type = string
+  default = "no-reply"
 }

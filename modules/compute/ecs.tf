@@ -352,11 +352,11 @@ resource "aws_ecs_task_definition" "backend" {
     {
       name      = "backend-java"
       essential = true
-      image     = "${var.repository_name}:sha-4846ce0"
+      image     = "${var.repository_name}:${var.healthy_tag}"
 
       cpu               = 512
-      memoryReservation = 512
-      memory            = 1024
+      memoryReservation = 450
+      memory            = 900
 
       portMappings = [{
         containerPort = 8080

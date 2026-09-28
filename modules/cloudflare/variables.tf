@@ -19,3 +19,16 @@ variable "alb_domain" {
 variable "backend_record_name" {
   type    = string
 }
+
+variable "ses_dkim_tokens" {
+  type = list(string)
+}
+
+variable "ses_email_subdomain" {
+  type = string
+  default = "no-reply"
+}
+
+variable "region" {
+  type = string
+}
