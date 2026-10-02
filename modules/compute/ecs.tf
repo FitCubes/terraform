@@ -251,6 +251,46 @@ resource "aws_iam_role_policy_attachment" "ecs_lb" {
   policy_arn = aws_iam_policy.ecs_lb.arn
 }
 
+# TASK POLICY
+data "aws_iam_policy_document" "ecs_task_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_task_role" {
+  name = "${var.vpc_name}-ecs-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_role.json
+}
+
+data "aws_iam_policy_document" "ecs_task_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ses:SendEmail",
+      "ses:SendRawEmail"
+    ]
+    resources = [
+      aws_sesv2_email_identity.backend.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ecs_task_policy" {
+  name = "${var.vpc_name}-ecs-task-policy"
+  policy = data.aws_iam_policy_document.ecs_task_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task" {
+  role = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.ecs_task_policy.arn
+}
+
 # ======================= INSTANCE =============================
 data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
@@ -348,6 +388,7 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_ec2_capacity" {
 resource "aws_ecs_task_definition" "backend" {
   family             = "backend"
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([
     {
       name      = "backend-java"
@@ -367,6 +408,18 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name  = "SPRING_DATA_REDIS_PORT"
           value = tostring(aws_elasticache_cluster.redis.port)
+        },
+        {
+          name = "EMAIL_PROVIDER"
+          value = "ses"
+        },
+        {
+          name = "AWS_SES_REGION"
+          value = "${var.region}"
+        },
+        {
+          name = "SES_SENDER_EMAIL"
+          value = "${var.ses_email_subdomain}@${var.frontend_domain}"
         }
       ]
       secrets = [
@@ -578,20 +631,20 @@ resource "aws_appautoscaling_policy" "ecs_scaling_cpu" {
   }
 }
 
-resource "aws_appautoscaling_policy" "ecs_scaling_memory" {
-  name               = "${var.vpc_name}-ecs-memory-scaling"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs_scale.id
-  scalable_dimension = aws_appautoscaling_target.ecs_scale.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_scale.service_namespace
+# resource "aws_appautoscaling_policy" "ecs_scaling_memory" {
+#   name               = "${var.vpc_name}-ecs-memory-scaling"
+#   policy_type        = "TargetTrackingScaling"
+#   resource_id        = aws_appautoscaling_target.ecs_scale.id
+#   scalable_dimension = aws_appautoscaling_target.ecs_scale.scalable_dimension
+#   service_namespace  = aws_appautoscaling_target.ecs_scale.service_namespace
 
-  target_tracking_scaling_policy_configuration {
-    target_value = var.appautoscaling_memory_threshold
+#   target_tracking_scaling_policy_configuration {
+#     target_value = var.appautoscaling_memory_threshold
 
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-    }
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 300
-  }
-}
+#     predefined_metric_specification {
+#       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+#     }
+#     scale_in_cooldown  = 300
+#     scale_out_cooldown = 300
+#   }
+# }

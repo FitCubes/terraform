@@ -9,3 +9,7 @@ variable "ecs_service_arn" {
 variable "esc_task_execution_role" {
   type = string
 }
+
+variable "ecs_task_role" {
+
+}

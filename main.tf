@@ -17,6 +17,7 @@ module "users" {
   frontend_bucket_arn     = module.frontend_bucket.frontend_bucket_arn
   ecs_service_arn         = module.compute.ecs_service_arn
   esc_task_execution_role = module.compute.esc_task_execution_role
+  ecs_task_role           = module.compute.ecs_task_role
 }
 
 module "compute" {

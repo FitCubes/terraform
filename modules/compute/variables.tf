@@ -101,7 +101,7 @@ variable "repository_name" {
 
 variable "healthy_tag" {
   type = string
-  default = "sha-4846ce0"
+  default = "sha-ef55b8b"
 }
 
 variable "backend_domain" {

@@ -69,7 +69,8 @@ data "aws_iam_policy_document" "ecs_deploy" {
     effect  = "Allow"
     actions = ["iam:PassRole"]
     resources = [
-      var.esc_task_execution_role
+      var.esc_task_execution_role,
+      var.ecs_task_role
     ]
   }
 }
