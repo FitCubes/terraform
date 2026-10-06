@@ -67,7 +67,7 @@ resource "aws_lb_listener_rule" "forward_to_api" {
     }
   }
   lifecycle {
-    ignore_changes = [ action[0].forward ]
+    ignore_changes = [action[0].forward]
   }
 }
 
@@ -94,6 +94,6 @@ resource "aws_lb_listener_rule" "test" {
     }
   }
   lifecycle {
-    ignore_changes = [ action[0].forward ]
+    ignore_changes = [action[0].forward]
   }
 }

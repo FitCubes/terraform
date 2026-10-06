@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "logs_retention_days" {
-  type = number
+  type    = number
   default = 3
 }
 
@@ -37,7 +37,7 @@ variable "elasticache_cidrs" {
 }
 
 variable "instance_type" {
-  type    = string
+  type = string
 }
 
 variable "postgres_version" {
@@ -100,7 +100,7 @@ variable "repository_name" {
 }
 
 variable "healthy_tag" {
-  type = string
+  type    = string
   default = "sha-ef55b8b"
 }
 
@@ -109,36 +109,36 @@ variable "backend_domain" {
 }
 
 variable "max_asg_size" {
-  type = number
+  type    = number
   default = 1
 }
 
 variable "rate_5xx_percent" {
-  type = number
+  type    = number
   default = 5
 }
 
 variable "min_appautoscaling_capacity" {
-  type = number
+  type    = number
   default = 1
 }
 
 variable "max_appautoscaling_capacity" {
-  type = number
+  type    = number
   default = 2
 }
 
 variable "appautoscaling_cpu_threshold" {
-  type = number
+  type    = number
   default = 80
 }
 
 variable "appautoscaling_memory_threshold" {
-  type = number
+  type    = number
   default = 95
 }
 
 variable "ses_email_subdomain" {
-  type = string
+  type    = string
   default = "no-reply"
 }

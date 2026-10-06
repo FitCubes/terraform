@@ -54,42 +54,42 @@ resource "cloudflare_ruleset" "bypass_caching" {
 }
 
 resource "cloudflare_dns_record" "ses_dkim" {
-  count = 3
+  count   = 3
   zone_id = var.cloudflare_zone_id
 
-  name = "${var.ses_dkim_tokens[count.index]}._domainkey"
+  name    = "${var.ses_dkim_tokens[count.index]}._domainkey"
   content = "${var.ses_dkim_tokens[count.index]}.dkim.amazonses.com"
-  type = "CNAME"
+  type    = "CNAME"
   proxied = false
-  ttl = 1
+  ttl     = 1
 }
 
 
 resource "cloudflare_dns_record" "dmarc_ses" {
   zone_id = var.cloudflare_zone_id
 
-  name = "_dmarc"
+  name    = "_dmarc"
   content = "\"v=DMARC1; p=none;\""
-  type = "TXT"
-  ttl = 1
+  type    = "TXT"
+  ttl     = 1
 }
 
 
 resource "cloudflare_dns_record" "ses_mx" {
   zone_id = var.cloudflare_zone_id
 
-  name = var.ses_email_subdomain
-  content = "feedback-smtp.${var.region}.amazonses.com"
-  ttl = 1
+  name     = var.ses_email_subdomain
+  content  = "feedback-smtp.${var.region}.amazonses.com"
+  ttl      = 1
   priority = 10
-  type = "MX"
+  type     = "MX"
 }
 
 resource "cloudflare_dns_record" "spf_ses_from" {
   zone_id = var.cloudflare_zone_id
 
-  name = var.ses_email_subdomain
+  name    = var.ses_email_subdomain
   content = "\"v=spf1 include:amazonses.com ~all\""
-  type = "TXT"
-  ttl = 1
+  type    = "TXT"
+  ttl     = 1
 }

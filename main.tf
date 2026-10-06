@@ -34,10 +34,10 @@ module "compute" {
   postgres_db_name       = var.postgres_db_name
   jwt_secret             = var.jwt_secret
   backend_domain         = local.backend_domain
-  ses_email_subdomain = var.ses_email_subdomain
-  instance_type = var.instance_type
+  ses_email_subdomain    = var.ses_email_subdomain
+  instance_type          = var.instance_type
   log_group_lamdba_smoke = var.log_group_lambda_smoke
-  repository_name = var.repository_name
+  repository_name        = var.repository_name
 }
 
 

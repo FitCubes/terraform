@@ -17,7 +17,7 @@ variable "alb_domain" {
 }
 
 variable "backend_record_name" {
-  type    = string
+  type = string
 }
 
 variable "ses_dkim_tokens" {
@@ -25,7 +25,7 @@ variable "ses_dkim_tokens" {
 }
 
 variable "ses_email_subdomain" {
-  type = string
+  type    = string
   default = "no-reply"
 }
 

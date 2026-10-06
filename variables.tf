@@ -144,6 +144,6 @@ variable "backend_record_name" {
 
 
 variable "ses_email_subdomain" {
-  type = string
+  type    = string
   default = "no-reply"
 }

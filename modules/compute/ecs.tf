@@ -264,7 +264,7 @@ data "aws_iam_policy_document" "ecs_task_role" {
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.vpc_name}-ecs-task-role"
+  name               = "${var.vpc_name}-ecs-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_role.json
 }
 
@@ -282,12 +282,12 @@ data "aws_iam_policy_document" "ecs_task_policy" {
 }
 
 resource "aws_iam_policy" "ecs_task_policy" {
-  name = "${var.vpc_name}-ecs-task-policy"
+  name   = "${var.vpc_name}-ecs-task-policy"
   policy = data.aws_iam_policy_document.ecs_task_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task" {
-  role = aws_iam_role.ecs_task_role.name
+  role       = aws_iam_role.ecs_task_role.name
   policy_arn = aws_iam_policy.ecs_task_policy.arn
 }
 
@@ -410,15 +410,15 @@ resource "aws_ecs_task_definition" "backend" {
           value = tostring(aws_elasticache_cluster.redis.port)
         },
         {
-          name = "EMAIL_PROVIDER"
+          name  = "EMAIL_PROVIDER"
           value = "ses"
         },
         {
-          name = "AWS_SES_REGION"
+          name  = "AWS_SES_REGION"
           value = "${var.region}"
         },
         {
-          name = "SES_SENDER_EMAIL"
+          name  = "SES_SENDER_EMAIL"
           value = "${var.ses_email_subdomain}@${var.frontend_domain}"
         }
       ]
@@ -462,79 +462,79 @@ resource "aws_ecs_task_definition" "backend" {
 
 # Alarm
 resource "aws_cloudwatch_metric_alarm" "high_5XX" {
-  alarm_name = "${var.vpc_name}-high-5xx"
-  alarm_description = "Error rate > ${var.rate_5xx_percent}%"
+  alarm_name          = "${var.vpc_name}-high-5xx"
+  alarm_description   = "Error rate > ${var.rate_5xx_percent}%"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods = 2
-  threshold = var.rate_5xx_percent
+  evaluation_periods  = 2
+  threshold           = var.rate_5xx_percent
 
   metric_query {
-    id = "err_blue"
+    id    = "err_blue"
     label = "Errors Blue"
     metric {
       metric_name = "HTTPCode_Target_5XX_Count"
-      namespace = "AWS/ApplicationELB"
-      period = 60
-      stat = "Sum"
+      namespace   = "AWS/ApplicationELB"
+      period      = 60
+      stat        = "Sum"
       dimensions = {
-        TargetGroup = aws_lb_target_group.ecs_ec2_blue.arn_suffix
+        TargetGroup  = aws_lb_target_group.ecs_ec2_blue.arn_suffix
         LoadBalancer = aws_lb.backend.arn_suffix
       }
     }
   }
   metric_query {
-    id = "err_green"
+    id    = "err_green"
     label = "Errors Green"
     metric {
       metric_name = "HTTPCode_Target_5XX_Count"
-      namespace = "AWS/ApplicationELB"
-      period = 60
-      stat = "Sum"
+      namespace   = "AWS/ApplicationELB"
+      period      = 60
+      stat        = "Sum"
       dimensions = {
-        TargetGroup = aws_lb_target_group.ecs_ec2_green.arn_suffix
+        TargetGroup  = aws_lb_target_group.ecs_ec2_green.arn_suffix
         LoadBalancer = aws_lb.backend.arn_suffix
       }
     }
   }
   metric_query {
-    id = "request_blue"
+    id    = "request_blue"
     label = "Total Blue"
     metric {
       metric_name = "RequestCount"
-      namespace = "AWS/ApplicationELB"
-      period = 60
-      stat = "Sum"
+      namespace   = "AWS/ApplicationELB"
+      period      = 60
+      stat        = "Sum"
       dimensions = {
-        TargetGroup = aws_lb_target_group.ecs_ec2_blue.arn_suffix
+        TargetGroup  = aws_lb_target_group.ecs_ec2_blue.arn_suffix
         LoadBalancer = aws_lb.backend.arn_suffix
       }
     }
   }
   metric_query {
-    id = "request_green"
+    id    = "request_green"
     label = "Total Green"
     metric {
       metric_name = "RequestCount"
-      namespace = "AWS/ApplicationELB"
-      period = 60
-      stat = "Sum"
+      namespace   = "AWS/ApplicationELB"
+      period      = 60
+      stat        = "Sum"
       dimensions = {
-        TargetGroup = aws_lb_target_group.ecs_ec2_green.arn_suffix
+        TargetGroup  = aws_lb_target_group.ecs_ec2_green.arn_suffix
         LoadBalancer = aws_lb.backend.arn_suffix
       }
     }
   }
   metric_query {
-    id = "requests"
+    id         = "requests"
     expression = "FILL(request_blue, 0) + FILL(request_green, 0)"
   }
   metric_query {
-    id = "errors"
+    id         = "errors"
     expression = "FILL(err_blue , 0) + FILL(err_green, 0)"
   }
   metric_query {
-    id = "rate"
-    expression = "IF(requests > 20, errors / requests * 100, 0)"
+    id          = "rate"
+    expression  = "IF(requests > 20, errors / requests * 100, 0)"
     return_data = true
   }
 }
@@ -589,7 +589,7 @@ resource "aws_ecs_service" "backend" {
   }
 
   alarms {
-    enable = true
+    enable   = true
     rollback = true
     alarm_names = [
       aws_cloudwatch_metric_alarm.high_5XX.alarm_name
