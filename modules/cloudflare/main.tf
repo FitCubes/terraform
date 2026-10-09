@@ -93,3 +93,20 @@ resource "cloudflare_dns_record" "spf_ses_from" {
   type    = "TXT"
   ttl     = 1
 }
+
+
+resource "cloudflare_dns_record" "www" {
+  zone_id = var.cloudflare_zone_id
+
+  name = "www.${cloudflare_dns_record.frontend_cname.name}"
+  type = "CNAME"
+  content = cloudflare_dns_record.frontend_cname.name
+  ttl = 1
+  proxied = true
+}
+
+resource "cloudflare_zone_setting" "always_use_https" {
+  zone_id    = var.cloudflare_zone_id
+  setting_id = "always_use_https"
+  value      = "on"
+}
